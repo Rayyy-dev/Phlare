@@ -42,14 +42,14 @@ function render(inputMmd, outBase) {
 if (!existsSync(diagramsDir)) mkdirSync(diagramsDir, { recursive: true });
 
 // 1) Hand-authored conceptual + architecture figures.
+// Mermaid-generated figures only. The conceptual figures (fig1, fig5, fig6,
+// fig7, fig8) are hand-authored PNGs committed directly, because their manual
+// layout reads more cleanly in print than the auto-generated version. Do not
+// add them here or `npm run diagrams` will overwrite the hand-made files.
 const figures = [
   "fig2-threat-ecosystem",
   "fig3-market-gap",
   "fig4-system-architecture",
-  "fig5-phishing-evolution",
-  "fig6-attack-taxonomy",
-  "fig7-cialdini-principles",
-  "fig8-dsrm-methodology",
 ];
 for (const name of figures) {
   const src = join(diagramsDir, `${name}.mmd`);

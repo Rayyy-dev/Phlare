@@ -8,14 +8,16 @@ import { prisma } from "@/server/db";
 export default async function DashboardPage() {
   const admin = await requireAdmin();
 
-  const [recipients, campaigns, templates] = await Promise.all([
+  const [recipients, groups, templates, campaigns] = await Promise.all([
     prisma.recipient.count({ where: { deletedAt: null } }),
-    prisma.campaign.count({ where: { deletedAt: null } }),
+    prisma.group.count({ where: { deletedAt: null } }),
     prisma.emailTemplate.count({ where: { deletedAt: null } }),
+    prisma.campaign.count({ where: { deletedAt: null } }),
   ]);
 
   const stats = [
-    { label: "Recipients", value: recipients, hint: "Phase 2" },
+    { label: "Recipients", value: recipients, hint: null },
+    { label: "Groups", value: groups, hint: null },
     { label: "Email templates", value: templates, hint: "Phase 3" },
     { label: "Campaigns", value: campaigns, hint: "Phase 4" },
   ];
@@ -29,24 +31,25 @@ export default async function DashboardPage() {
         </p>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {stats.map((s) => (
           <div key={s.label} className="card">
             <p className="text-sm font-medium text-slate-500">{s.label}</p>
             <p className="mt-2 text-3xl font-bold">{s.value}</p>
-            <p className="mt-1 text-xs text-slate-400">Available in {s.hint}</p>
+            <p className="mt-1 text-xs text-slate-400">
+              {s.hint ? `Available in ${s.hint}` : "Active"}
+            </p>
           </div>
         ))}
       </div>
 
       <div className="card">
-        <h2 className="text-lg font-semibold">Phase 1 complete</h2>
+        <h2 className="text-lg font-semibold">Getting started</h2>
         <p className="mt-2 text-sm text-slate-600">
-          The foundation is in place: authenticated admin area, server-side
-          sessions, PostgreSQL via Prisma, the background-worker process, and the
-          one-command Docker stack with a local mail-catcher. Subsequent phases
-          add recipients, content, the campaign engine, just-in-time learning,
-          and analytics.
+          Add your people under <strong>Recipients</strong> — individually or via
+          CSV import — and organise them into <strong>Groups</strong> for
+          targeting. Email templates, sending profiles, and campaigns arrive in
+          the next phases.
         </p>
       </div>
     </div>

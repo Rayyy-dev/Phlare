@@ -14,8 +14,8 @@ export const dynamic = "force-dynamic";
 
 const NAV: { href: string; label: string; phase?: number }[] = [
   { href: "/dashboard", label: "Dashboard" },
-  { href: "/recipients", label: "Recipients", phase: 2 },
-  { href: "/groups", label: "Groups", phase: 2 },
+  { href: "/recipients", label: "Recipients" },
+  { href: "/groups", label: "Groups" },
   { href: "/templates", label: "Email Templates", phase: 3 },
   { href: "/landing-pages", label: "Landing Pages", phase: 3 },
   { href: "/sending-profiles", label: "Sending Profiles", phase: 3 },

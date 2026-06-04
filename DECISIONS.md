@@ -147,9 +147,38 @@ emits Mermaid markdown there, not an image).
 
 ---
 
+## D10 — Soft-delete reactivation instead of a partial unique index
+
+**Context.** `Recipient.email` and `Group.name` are plain `@unique` columns, but
+records are soft-deleted (`deletedAt`). We want uniqueness only among *active*
+records — a value freed by a soft delete should be reusable — which a plain
+unique constraint does not allow, and Postgres cannot express as a partial
+unique index through Prisma's schema.
+
+**Decision.** Resolve it in the application layer. When an admin adds an email
+(or group name) that matches a **soft-deleted** record, we do not error: we offer
+to **reactivate** that record (clear `deletedAt`, overwrite its fields) rather
+than create a duplicate. A match against an **active** record is still rejected
+as a duplicate. CSV import applies the same rule automatically (soft-deleted
+matches are reactivated; active matches are skipped or updated).
+
+**Rationale.** Keeps the schema simple and portable while giving the intended
+"unique among active" semantics and a friendly recovery path. The single unique
+constraint still guarantees there is at most one row per email/name to reactivate.
+
+**Trade-offs.** Uniqueness is enforced by code on the write paths rather than by
+the database alone; all create/import paths funnel through the service layer so
+the rule is applied consistently.
+
 ## Phase log
 
 - **Phase 1 (foundation).** Scaffolded the app; implemented the setup wizard,
   session auth with lockout, the Prisma schema (full model, migration `init`),
   the worker process and queue wiring, and the Docker stack with Mailpit.
   Verified end-to-end: routing/guards, argon2 auth, and worker↔Redis.
+- **Phase 2 (recipients & groups).** Recipient CRUD with soft-delete and
+  search/department/group filters + pagination; group CRUD and membership
+  management; CSV import with column mapping, per-row validation, an
+  imported/updated/reactivated/skipped/failed report, and email idempotency.
+  Email/name uniqueness and reactivation per D10. Every mutation audited. Added
+  synthetic seed data (8 recipients, 2 groups). No schema change required.
