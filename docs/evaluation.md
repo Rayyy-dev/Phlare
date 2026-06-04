@@ -9,19 +9,24 @@ recipients through the local mail-catcher and produces metrics/screenshots.
 
 ## 1. Test strategy
 
-- **Unit tests** (Vitest) — pure logic: password hashing/verify, session
-  hashing/expiry, AES-GCM round-trip, Zod validators, risk-score formula.
-- **Integration tests** — API route handlers against a test database.
-- **End-to-end** (Playwright) — at least the happy path: setup → login →
-  create recipients → build campaign → launch → simulate open/click/submit →
-  teachable moment → analytics reflect the events.
+- **Unit tests** (Vitest, `tests/unit/`, `npm test`) — ✅ 32 tests over the core
+  pure logic: argon2 password hashing/verify, AES-GCM round-trip + tamper
+  detection, whitelisted personalisation (incl. injection resistance), risk-score
+  formula + decay, CSV parse/auto-map/serialise, and HTML sanitisation.
+- **End-to-end** (Playwright, `tests/e2e/`, `npm run test:e2e`) — ✅ the full
+  happy path: log in → create a sending profile → create and launch a campaign →
+  worker delivers → open/click/submit via the public tracking routes →
+  teachable-moment page → events appear in the campaign analytics report.
+  Requires the stack running (web + worker + postgres + redis + mailpit) and
+  seeded data.
 
 ## 2. Demo harness
 
-`scripts/demo-campaign.ts` (Phase 7) seeds a fixed set of synthetic recipients,
-launches a campaign against Mailpit, drives a deterministic pattern of
-open/click/submit/report events, and prints the resulting metrics — so Chapter 5
-figures are reproducible.
+`scripts/demo-campaign.ts` (`npm run demo`) loads a fixed set of **synthetic,
+fictional** recipients, launches a campaign against Mailpit, drives a
+deterministic (index-based) pattern of open/click/submit/report/quiz events, then
+writes reproducible Chapter-5 artefacts to `demo-output/`:
+`metrics.json`, `campaign-report.pdf`, `analytics.png`, `campaign-report.png`.
 
 Mailpit's web UI (http://localhost:8025) shows the delivered simulated emails for
 screenshots.

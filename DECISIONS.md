@@ -232,6 +232,31 @@ key from page source before answering) and keeps the stored data minimal and
 PII-free, consistent with the no-credential-capture stance. One result per
 (target, quiz) keeps analytics clean.
 
+## D15 — Retention deletes raw events, keeps aggregates
+
+**Decision.** The daily retention job deletes `Event` rows older than
+`Settings.retentionDays` but leaves the denormalised first-event markers and
+counts on `CampaignTarget`. `retentionDays = 0` means keep indefinitely.
+
+**Rationale.** Satisfies GDPR storage-limitation (the detailed, timestamped event
+log is the most privacy-sensitive data) while preserving historical phish-prone%
+and per-recipient aggregates for trend reporting. Pruning aggregates too would
+destroy the longitudinal value with little privacy gain (no PII in the counts).
+
+## D16 — Environment-aware CSP; rate limiting on tracking routes
+
+**Decision.** A Content-Security-Policy is sent on every response. `unsafe-eval`
+is included **in development only** (Next.js fast-refresh needs it); the
+production CSP omits it. Public open-pixel and submit routes are rate-limited
+per IP with a generous fixed window.
+
+**Rationale.** Verified that Recharts renders under the strict production CSP
+(no `unsafe-eval`) — the eval requirement was purely Next's dev HMR, so shipping
+a weaker prod CSP was unnecessary. `unsafe-inline` is still required for scripts
+(no nonce pipeline) — documented as the remaining hardening step. The rate-limit
+window is deliberately generous so an office behind one NAT egress IP is not
+throttled while a campaign lands.
+
 ## Phase log
 
 - **Phase 1 (foundation).** Scaffolded the app; implemented the setup wizard,
@@ -281,3 +306,12 @@ PII-free, consistent with the no-credential-capture stance. One result per
   session cookie). No schema change. Verified end-to-end (18/18) — metrics,
   department breakdown, repeat clickers, all three risk scores matching the
   formula, CSV, and a 60 KB PDF.
+- **Phase 7 (hardening, tests & demo harness).** CSP/HSTS headers (env-aware,
+  D16), per-IP rate limiting on the public tracking routes, and an **implemented**
+  data-retention cleanup job (D15) — replacing the earlier stub. Removed the
+  unused `Event.ipPrefix` column (migration) so the schema matches the honest
+  "IP is never collected" stance. Added a Settings + audit-log admin page
+  (closing §5.11). 32 Vitest unit tests and a Playwright end-to-end happy-path
+  test; reproducible `npm run demo` harness producing metrics + PDF + screenshots
+  (charts render under the strict prod CSP). Dockerfile installs Chromium for the
+  PDF route. ERD regenerated. Verified: retention (5/5), unit (32/32), e2e (1/1).

@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { recordSubmit } from "@/server/tracking/events";
+import { allowRequest, clientIp } from "@/server/security/rate-limit";
 
 export const dynamic = "force-dynamic";
 
@@ -17,6 +18,9 @@ export async function POST(
   { params }: { params: Promise<{ token: string }> }
 ) {
   const { token } = await params;
+  if (!allowRequest(`submit:${clientIp(req.headers)}`)) {
+    return NextResponse.redirect(new URL(`/t/learn/${token}`, req.url), 303);
+  }
 
   let fieldNames: string[] = [];
   try {

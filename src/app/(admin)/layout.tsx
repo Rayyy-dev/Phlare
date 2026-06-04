@@ -22,7 +22,7 @@ const NAV: { href: string; label: string; phase?: number }[] = [
   { href: "/sending-profiles", label: "Sending Profiles" },
   { href: "/campaigns", label: "Campaigns" },
   { href: "/analytics", label: "Analytics" },
-  { href: "/settings", label: "Settings", phase: 6 },
+  { href: "/settings", label: "Settings" },
 ];
 
 export default async function AdminLayout({

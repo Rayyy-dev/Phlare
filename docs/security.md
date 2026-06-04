@@ -11,7 +11,7 @@ Maps to the thesis chapter on ethical and legal considerations. Phlare is a
 | 2 | **Authorization gate** | ✅ Live: a campaign cannot launch until the admin affirms authorisation; the acknowledgement (`authorizationAck`, `authorizedBy`, `authorizedAt`) is recorded and a launch without it is refused. |
 | 3 | **Clear simulation disclosure** | ✅ Live: every teachable-moment page states it was an authorised internal security-awareness exercise and that nothing typed was stored. |
 | 4 | **Generic, non-branded templates** | The seeded library uses fictional brands ("Acme Corp / IT Helpdesk"); no real logos or trademarked login clones (Phase 3). |
-| 5 | **Data minimisation & retention** | Only analytics-necessary data is collected; `userAgent` truncated, IP coarse/optional; configurable `retentionDays` with a scheduled cleanup job (Phases 4/7). |
+| 5 | **Data minimisation & retention** | ✅ Live: only analytics-necessary data is collected; `userAgent` is truncated and **IP addresses are never collected** (there is deliberately no IP column). `Settings.retentionDays` is enforced by a **daily worker cleanup** (`src/server/retention/`) that deletes raw events older than the window, keeping only denormalised aggregates. |
 | 6 | **The platform itself is secure** | See §2. |
 | 7 | **Audit logging** | Sensitive admin actions recorded in `audit_log` with actor + timestamp. |
 
@@ -25,8 +25,10 @@ Maps to the thesis chapter on ethical and legal considerations. Phlare is a
 | **IDOR on tracking** | 32-byte base64url unguessable tokens, unique per target; no sequential IDs in public URLs; unknown/expired tokens return generic responses (no enumeration hint). ✅ Phase 4 |
 | **XSS** (template/landing HTML) | Server-side sanitisation (`sanitize-html`) before store and before render; script/style/iframe/form dropped; strict whitelisted personalisation variables — unknown `{{tokens}}` are left literal, never evaluated (no template injection). ✅ Phase 3 |
 | **SQL injection** | Prisma parameterised queries throughout. ✅ |
-| **CSRF** | SameSite cookies + same-origin Server Actions; explicit origin checks on state-changing routes. ✅/⏳ |
-| **Clickjacking / sniffing** | `X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`, `Referrer-Policy`. ✅ Phase 1 |
+| **CSRF** | All admin mutations go through Next.js Server Actions, which enforce a same-origin check (Origin vs Host) on every invocation; session cookies are `SameSite=Lax`. ✅ Phase 7 |
+| **Clickjacking / sniffing / CSP** | `X-Frame-Options: DENY` + `frame-ancestors 'none'`; `X-Content-Type-Options: nosniff`; `Referrer-Policy`; HSTS; a Content-Security-Policy (`object-src 'none'`, `base-uri 'self'`, `form-action 'self'`). `unsafe-eval` is allowed in **development only** (Next fast-refresh) — production CSP is stricter. ✅ Phase 7 |
+| **DoS / scraping of tracking routes** | Per-IP fixed-window rate limit on the open-pixel and submit endpoints (`src/server/security/rate-limit.ts`); generous window so a NAT'd office is not throttled. ✅ Phase 7 |
+| **Data retention (GDPR)** | Daily worker job deletes raw events older than `Settings.retentionDays` (`src/server/retention/`). ✅ Phase 7 |
 | **Input validation** | Zod schemas on all inputs, shared client/server. ✅ (grows per phase) |
 
 ## 3. Key management

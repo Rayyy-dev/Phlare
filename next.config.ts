@@ -20,6 +20,27 @@ const nextConfig: NextConfig = {
           { key: "X-Content-Type-Options", value: "nosniff" },
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
           { key: "X-DNS-Prefetch-Control", value: "off" },
+          // HSTS is honoured only over HTTPS; harmless in dev. Defence-in-depth.
+          { key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains" },
+          // CSP as defence-in-depth (the primary XSS control is server-side
+          // sanitisation of user-authored HTML). 'unsafe-inline' is required by
+          // Next.js hydration without a nonce pipeline; 'unsafe-eval' is added in
+          // DEVELOPMENT ONLY (Next dev fast-refresh uses eval) — production stays
+          // stricter. Documented in security.md.
+          {
+            key: "Content-Security-Policy",
+            value: [
+              "default-src 'self'",
+              "img-src 'self' data:",
+              "style-src 'self' 'unsafe-inline'",
+              `script-src 'self' 'unsafe-inline'${process.env.NODE_ENV === "production" ? "" : " 'unsafe-eval'"}`,
+              "font-src 'self'",
+              "object-src 'none'",
+              "base-uri 'self'",
+              "frame-ancestors 'none'",
+              "form-action 'self'",
+            ].join("; "),
+          },
         ],
       },
     ];

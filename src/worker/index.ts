@@ -1,7 +1,8 @@
 import { Worker } from "bullmq";
-import { connection, riskQueue, QUEUE_NAMES } from "./queues";
+import { connection, riskQueue, retentionQueue, QUEUE_NAMES } from "./queues";
 import { processSend, processScheduledLaunch } from "@/server/campaigns/send-runner";
 import { refreshAllRiskScores } from "@/server/risk/service";
+import { runRetentionCleanup } from "@/server/retention/service";
 
 /**
  * Background worker entrypoint. Runs as a separate process/container from the
@@ -36,11 +37,15 @@ const riskWorker = new Worker(
   { connection }
 );
 
-// Data-retention cleanup is implemented in Phase 7; the queue is wired now.
 const retentionWorker = new Worker(
   QUEUE_NAMES.retention,
-  async (job) => {
-    console.log(`[worker:retention] (placeholder) job ${job.id}`, job.data);
+  async () => {
+    const { deletedEvents, cutoff } = await runRetentionCleanup();
+    console.log(
+      cutoff
+        ? `[worker:retention] deleted ${deletedEvents} events older than ${cutoff.toISOString()}`
+        : "[worker:retention] retention disabled (retentionDays <= 0)"
+    );
   },
   { connection }
 );
@@ -54,6 +59,11 @@ for (const w of [sendWorker, scheduleWorker, riskWorker, retentionWorker]) {
 riskQueue
   .upsertJobScheduler("risk-periodic", { every: 120_000 }, { name: "refresh" })
   .catch((err) => console.error("[worker] failed to schedule risk refresh:", err));
+
+// Daily data-retention cleanup (GDPR storage-limitation).
+retentionQueue
+  .upsertJobScheduler("retention-daily", { every: 86_400_000 }, { name: "cleanup" })
+  .catch((err) => console.error("[worker] failed to schedule retention cleanup:", err));
 
 async function shutdown() {
   console.log("[worker] shutting down…");

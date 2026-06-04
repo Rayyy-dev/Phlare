@@ -50,3 +50,6 @@ AGENT*.md
 
 # typescript incremental build info
 *.tsbuildinfo
+
+# demo / evaluation harness artefacts
+/demo-output/

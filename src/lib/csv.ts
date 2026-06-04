@@ -92,7 +92,9 @@ export function autoDetectMapping(headers: string[]): Record<RecipientField, str
   const mapping = {} as Record<RecipientField, string>;
 
   for (const field of RECIPIENT_FIELDS) {
-    const aliases = HEADER_ALIASES[field];
+    // Normalise BOTH sides so aliases written with hyphens (e.g. "e-mail") still
+    // match a header whose hyphens were turned into spaces during normalisation.
+    const aliases = HEADER_ALIASES[field].map(normalise);
     const match = headers.find((h) => aliases.includes(normalise(h)));
     mapping[field] = match ?? "";
   }

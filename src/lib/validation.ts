@@ -173,6 +173,22 @@ export const quizSchema = z.object({
 export type QuizQuestionInput = z.infer<typeof quizQuestionSchema>;
 export type QuizInput = z.infer<typeof quizSchema>;
 
+// ── Settings ─────────────────────────────────────────────────────────────────
+
+export const settingsSchema = z.object({
+  orgName: z.string().trim().min(1, "Organisation name is required.").max(160),
+  baseUrl: z.string().trim().url("Enter a valid URL."),
+  defaultThrottlePerMinute: z.coerce.number().int().min(1).max(10000),
+  // 0 = keep events indefinitely; otherwise the retention window in days.
+  retentionDays: z.coerce.number().int().min(0).max(3650),
+  reportEmail: z.preprocess(
+    (v) => (typeof v === "string" && v.trim() === "" ? undefined : v),
+    z.string().trim().toLowerCase().email("Enter a valid email.").optional()
+  ),
+});
+
+export type SettingsInput = z.infer<typeof settingsSchema>;
+
 export type EmailTemplateInput = z.infer<typeof emailTemplateSchema>;
 export type LandingFieldDef = z.infer<typeof landingFieldSchema>;
 export type LandingPageInput = z.infer<typeof landingPageSchema>;

@@ -365,8 +365,9 @@ model Event {
   campaignTarget   CampaignTarget @relation(fields: [campaignTargetId], references: [id], onDelete: Cascade)
   type             EventType
   occurredAt       DateTime       @default(now())
-  userAgent        String? // truncated; data minimisation
-  ipPrefix         String? // coarse/optional, never a full address
+  // Truncated user-agent only. IP addresses are intentionally NEVER collected
+  // (data minimisation, Section 7.5) — there is deliberately no IP column.
+  userAgent        String?
   // For SUBMITTED: { fields: ["username","password"] } — NAMES ONLY, never values.
   metadata         Json?
 

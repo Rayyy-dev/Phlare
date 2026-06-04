@@ -225,7 +225,6 @@ QUIZ_COMPLETED QUIZ_COMPLETED
     EventType type 
     DateTime occurredAt 
     String userAgent "❓"
-    String ipPrefix "❓"
     Json metadata "❓"
     }
   

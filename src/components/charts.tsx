@@ -21,7 +21,9 @@ export function RatesBarChart({
         <XAxis dataKey="name" tick={{ fontSize: 12, fill: INK }} />
         <YAxis tick={{ fontSize: 12, fill: INK }} unit="%" domain={[0, 100]} />
         <Tooltip formatter={(v: number) => `${v}%`} />
-        <Bar dataKey="value" radius={[4, 4, 0, 0]}>
+        {/* Animation off → charts render fully on first paint, so PDF export and
+            screenshots (Chapter 5 figures) are deterministic. */}
+        <Bar dataKey="value" radius={[4, 4, 0, 0]} isAnimationActive={false}>
           {data.map((_, i) => <Cell key={i} fill={SHADES[i % SHADES.length]} />)}
         </Bar>
       </BarChart>
@@ -42,9 +44,9 @@ export function TimeSeriesChart({
         <YAxis tick={{ fontSize: 12, fill: INK }} allowDecimals={false} />
         <Tooltip />
         <Legend wrapperStyle={{ fontSize: 12 }} />
-        <Line type="monotone" dataKey="opened" stroke={SHADES[0]} strokeWidth={2} dot={false} />
-        <Line type="monotone" dataKey="clicked" stroke={SHADES[2]} strokeWidth={2} dot={false} />
-        <Line type="monotone" dataKey="submitted" stroke={INK} strokeWidth={2} dot={false} />
+        <Line type="monotone" dataKey="opened" stroke={SHADES[0]} strokeWidth={2} dot={false} isAnimationActive={false} />
+        <Line type="monotone" dataKey="clicked" stroke={SHADES[2]} strokeWidth={2} dot={false} isAnimationActive={false} />
+        <Line type="monotone" dataKey="submitted" stroke={INK} strokeWidth={2} dot={false} isAnimationActive={false} />
       </LineChart>
     </ResponsiveContainer>
   );
@@ -62,7 +64,7 @@ export function DepartmentBarChart({
         <XAxis type="number" domain={[0, 100]} unit="%" tick={{ fontSize: 12, fill: INK }} />
         <YAxis type="category" dataKey="department" width={120} tick={{ fontSize: 12, fill: INK }} />
         <Tooltip formatter={(v: number) => `${v}%`} />
-        <Bar dataKey="phishProne" radius={[0, 4, 4, 0]} fill={SHADES[1]} />
+        <Bar dataKey="phishProne" radius={[0, 4, 4, 0]} fill={SHADES[1]} isAnimationActive={false} />
       </BarChart>
     </ResponsiveContainer>
   );

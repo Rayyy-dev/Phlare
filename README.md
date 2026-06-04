@@ -142,7 +142,11 @@ running log.
   (rates, phish-prone %, time-series, department & repeat-clicker breakdowns) with
   Recharts; transparent cached risk score refreshed by a worker; CSV export and a
   Playwright-rendered PDF report.
-- ⏳ Phase 7 — Hardening, tests, seed/demo harness
+- ✅ **Phase 7 — Hardening, tests & demo harness**: CSP/HSTS headers, rate
+  limiting on the public tracking routes, an enforced data-retention cleanup job,
+  Vitest unit tests for the core logic, a reproducible `npm run demo` evaluation
+  harness (synthetic data → metrics + PDF + screenshots), and a full
+  `docker compose up --build` stack.
 
 ---
 

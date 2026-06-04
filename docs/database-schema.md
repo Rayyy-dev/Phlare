@@ -49,8 +49,8 @@ The ERD below is generated **from that schema** (so it cannot drift) via
 ### Tracking & governance
 - **events** — append-only event log (`SENT`, `OPENED`, `CLICKED`, `SUBMITTED`,
   `REPORTED`, `LEARN_VIEWED`, `QUIZ_COMPLETED`). For `SUBMITTED`, `metadata`
-  holds field **names only**. `userAgent` is truncated and IP, if any, is coarse
-  (data minimisation).
+  holds field **names only**. `userAgent` is truncated; **IP addresses are never
+  collected** (no IP column exists) — data minimisation.
 - **settings** — singleton (`id = "singleton"`): org name, base URL, default
   throttle, retention period, report email.
 - **audit_log** — actor + action + entity for sensitive admin operations.
@@ -59,8 +59,9 @@ The ERD below is generated **from that schema** (so it cannot drift) via
 
 - **Idempotency.** First-event timestamps on `campaign_targets` make repeated
   pixel/click hits count once; `events` keeps the full history.
-- **Data minimisation (Section 7).** No submitted values; truncated UA; coarse/
-  optional IP; configurable retention (`settings.retentionDays`).
+- **Data minimisation (Section 7).** No submitted values; truncated UA; **no IP
+  collected at all**; `settings.retentionDays` enforced by a daily worker job
+  that deletes raw events past the window.
 - **Indexing.** Hot paths are indexed: `events(campaignTargetId, type)` and
   `events(occurredAt)` for time-series; `campaign_targets.status`;
   `recipients.deletedAt`; `audit_log.createdAt`.
