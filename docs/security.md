@@ -7,8 +7,8 @@ Maps to the thesis chapter on ethical and legal considerations. Phlare is a
 
 | # | Requirement | How Phlare enforces it |
 |---|---|---|
-| 1 | **No real credential capture** | The submit handler records only a `SUBMITTED` event and the **field names** present; typed values are discarded server-side and never logged, stored, or transmitted. Encoded in `schema.prisma` comments and the handler (Phase 4). |
-| 2 | **Authorization gate** | A campaign cannot launch until the admin affirms authorisation; the acknowledgement (`authorizationAck`, `authorizedBy`, `authorizedAt`) is recorded (Phase 4). |
+| 1 | **No real credential capture** | ✅ Live: the submit route (`t/s/[token]`) reads only `formData().keys()` (field **names**) and records those; the typed values are never read, stored, or logged. Verified end-to-end (a planted password value appears nowhere in the database). |
+| 2 | **Authorization gate** | ✅ Live: a campaign cannot launch until the admin affirms authorisation; the acknowledgement (`authorizationAck`, `authorizedBy`, `authorizedAt`) is recorded and a launch without it is refused. |
 | 3 | **Clear simulation disclosure** | Every teachable-moment page states it was an authorised internal exercise (Phase 5). |
 | 4 | **Generic, non-branded templates** | The seeded library uses fictional brands ("Acme Corp / IT Helpdesk"); no real logos or trademarked login clones (Phase 3). |
 | 5 | **Data minimisation & retention** | Only analytics-necessary data is collected; `userAgent` truncated, IP coarse/optional; configurable `retentionDays` with a scheduled cleanup job (Phases 4/7). |
@@ -22,7 +22,7 @@ Maps to the thesis chapter on ethical and legal considerations. Phlare is a
 | **Broken auth / brute force** | argon2id hashing; login lockout after 5 fails / 15 min; constant-time dummy verify to avoid user enumeration. ✅ Phase 1 |
 | **Session theft** | httpOnly + SameSite=Lax + Secure (prod) cookies; only `sha256(token)` stored, so a DB leak can't reconstruct cookies; instant server-side revocation. ✅ Phase 1 |
 | **Secrets at rest** | SMTP passwords AES-256-GCM encrypted; app secrets in `.env`, never committed. ✅ Phase 1 |
-| **IDOR on tracking** | 32-byte unguessable tokens; no sequential IDs in public URLs. ✅ schema; endpoints Phase 4 |
+| **IDOR on tracking** | 32-byte base64url unguessable tokens, unique per target; no sequential IDs in public URLs; unknown/expired tokens return generic responses (no enumeration hint). ✅ Phase 4 |
 | **XSS** (template/landing HTML) | Server-side sanitisation (`sanitize-html`) before store and before render; script/style/iframe/form dropped; strict whitelisted personalisation variables — unknown `{{tokens}}` are left literal, never evaluated (no template injection). ✅ Phase 3 |
 | **SQL injection** | Prisma parameterised queries throughout. ✅ |
 | **CSRF** | SameSite cookies + same-origin Server Actions; explicit origin checks on state-changing routes. ✅/⏳ |

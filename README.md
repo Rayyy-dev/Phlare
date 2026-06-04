@@ -129,7 +129,11 @@ running log.
   HTML editor + live preview, server-side sanitisation, strict whitelisted
   personalisation, SMTP sending profiles (encrypted at rest) with a Mailpit
   test-send, and a built-in starter content library.
-- ⏳ Phase 4 — Campaign engine + tracking
+- ✅ **Phase 4 — Campaign engine & tracking**: campaign CRUD with the
+  authorization gate and full lifecycle (launch/pause/stop/schedule), group→target
+  expansion with unguessable tokens, the BullMQ send pipeline (personalization +
+  open pixel + tokenized link), and the public tracking routes. Form submissions
+  record field names only — typed values are never stored or logged.
 - ⏳ Phase 5 — Just-in-time learning + quiz
 - ⏳ Phase 6 — Analytics, exports, risk scoring
 - ⏳ Phase 7 — Hardening, tests, seed/demo harness

@@ -201,6 +201,25 @@ left literal.
 content is a template-injection surface. A whitelist-only replacement makes
 injection impossible by construction and is trivial to reason about at defence.
 
+## D13 — Per-campaign throttling via staggered job delays
+
+**Context.** Each campaign sets its own `throttlePerMinute`. BullMQ's free-tier
+rate limiter is **per-worker (global)**, so it cannot enforce a different rate
+for each concurrently-running campaign.
+
+**Decision.** Stagger sends with per-job delays: job N is enqueued with a delay
+of `N × (60000 / throttlePerMinute)` ms. A 60/min campaign therefore sends one
+message per second, independent of other campaigns.
+
+**Rationale.** Gives an accurate, per-campaign send rate using only core BullMQ
+features, and stable `jobId`s (`send-<targetId>`) make enqueueing idempotent so
+resuming a paused campaign cannot double-send. (`:` is not allowed in BullMQ job
+IDs, hence the `-` separator.)
+
+**Trade-offs.** Delays are computed at enqueue time from the launch moment; a
+mid-flight throttle change would require re-enqueueing (not needed for the
+current scope).
+
 ## Phase log
 
 - **Phase 1 (foundation).** Scaffolded the app; implemented the setup wizard,
@@ -221,3 +240,15 @@ injection impossible by construction and is trivial to reason about at defence.
   that records the result; plaintext passwords never returned to the client.
   Seeded 3 built-in templates + 2 landing pages (generic, non-branded). No
   schema change required.
+- **Phase 4 (campaign engine & tracking).** Campaign CRUD; mandatory
+  authorisation gate before launch (records ack/by/at); lifecycle DRAFT →
+  SCHEDULED → RUNNING → COMPLETED with PAUSED/STOPPED. Launch expands groups into
+  one CampaignTarget per unique recipient with a 32-byte base64url token. BullMQ
+  send pipeline renders personalisation + injects the open pixel and tokenised
+  click link, sends via the profile, records SENT, and auto-completes;
+  per-campaign throttle via staggered delays (D13); scheduled launches fire
+  automatically. Public routes `t/o` (pixel), `t/c` (click→landing), `t/s`
+  (submit), `t/report`, `t/learn` — idempotent on first event, graceful on
+  unknown tokens. **Ethical invariant now live in code: form submissions record
+  field NAMES only; typed values are never read, stored, or logged** (verified
+  end-to-end, 23/23 checks). No schema change required.

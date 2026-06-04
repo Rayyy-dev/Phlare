@@ -47,3 +47,6 @@ yarn-error.log*
 .agent/
 AGENT*.md
 .mcp.json
+
+# typescript incremental build info
+*.tsbuildinfo

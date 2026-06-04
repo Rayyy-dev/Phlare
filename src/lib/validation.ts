@@ -134,6 +134,22 @@ export const testEmailSchema = z.object({
   to: z.string().trim().toLowerCase().email("Enter a valid email address."),
 });
 
+// ── Campaigns ────────────────────────────────────────────────────────────────
+
+export const campaignSchema = z.object({
+  name: z.string().trim().min(1, "Campaign name is required.").max(160),
+  emailTemplateId: z.string().min(1, "Select an email template."),
+  landingPageId: z.string().min(1, "Select a landing page."),
+  sendingProfileId: z.string().min(1, "Select a sending profile."),
+  quizId: optionalText(60),
+  groupIds: z.array(z.string().min(1)).min(1, "Select at least one recipient group."),
+  // datetime-local string; blank means "send on launch".
+  scheduledAt: optionalText(40),
+  throttlePerMinute: z.coerce.number().int().min(1, "At least 1 per minute.").max(10000),
+});
+
+export type CampaignInput = z.infer<typeof campaignSchema>;
+
 export type EmailTemplateInput = z.infer<typeof emailTemplateSchema>;
 export type LandingFieldDef = z.infer<typeof landingFieldSchema>;
 export type LandingPageInput = z.infer<typeof landingPageSchema>;
