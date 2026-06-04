@@ -65,7 +65,11 @@ export function QuizForm({
                   <input className="input" placeholder={`Option ${oi + 1}`} value={opt} onChange={(e) => patchOption(qi, oi, e.target.value)} />
                   {question.options.length > 2 && (
                     <button type="button" className="text-sm text-slate-400 hover:text-red-600"
-                      onClick={() => patch(qi, { options: question.options.filter((_, j) => j !== oi), correctIndex: Math.min(question.correctIndex, question.options.length - 2) })}>×</button>
+                      onClick={() => patch(qi, {
+                        options: question.options.filter((_, j) => j !== oi),
+                        // Keep correctIndex pointing at the same option after removal.
+                        correctIndex: oi === question.correctIndex ? 0 : oi < question.correctIndex ? question.correctIndex - 1 : question.correctIndex,
+                      })}>×</button>
                   )}
                 </div>
               ))}
