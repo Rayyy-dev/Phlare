@@ -44,9 +44,9 @@ screenshots.
 | F-12 | Tracking | Open pixel is idempotent; click/submit recorded | 4 | ⏳ |
 | F-13 | Ethics | Submitted values are **not** stored (only field names) | 4 | ⏳ |
 | F-14 | Learning | Click/submit always lands on the teachable-moment page | 5 | ⏳ |
-| F-15 | Analytics | Phish-prone %, rates, and per-department breakdowns correct | 6 | ⏳ |
-| F-16 | Export | PDF and CSV reports generate | 6 | ⏳ |
-| F-17 | Risk | Risk score matches the documented formula | 6 | ⏳ |
+| F-15 | Analytics | Phish-prone %, rates, time-series, and per-department breakdowns correct | 6 | ✅ |
+| F-16 | Export | PDF (Playwright) and CSV reports generate from real events | 6 | ✅ |
+| F-17 | Risk | Risk score matches the documented formula | 6 | ✅ |
 
 ## 4. Phase 1 verification (performed)
 

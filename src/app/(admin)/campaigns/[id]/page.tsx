@@ -43,12 +43,15 @@ export default async function CampaignDetailPage({
           <h1 className="mt-1 text-2xl font-bold tracking-tight">{campaign.name}</h1>
           <p className="mt-1 text-sm text-slate-500">Status: <strong>{campaign.status}</strong></p>
         </div>
-        {(campaign.status === "DRAFT" || campaign.status === "COMPLETED" || campaign.status === "STOPPED") && (
-          <form action={deleteCampaignAction}>
-            <input type="hidden" name="id" value={campaign.id} />
-            <ConfirmSubmit className="btn-secondary text-red-600" message={`Delete campaign "${campaign.name}"?`}>Delete</ConfirmSubmit>
-          </form>
-        )}
+        <div className="flex items-center gap-3">
+          <Link href={`/campaigns/${campaign.id}/report`} className="btn-secondary">View report</Link>
+          {(campaign.status === "DRAFT" || campaign.status === "COMPLETED" || campaign.status === "STOPPED") && (
+            <form action={deleteCampaignAction}>
+              <input type="hidden" name="id" value={campaign.id} />
+              <ConfirmSubmit className="btn-secondary text-red-600" message={`Delete campaign "${campaign.name}"?`}>Delete</ConfirmSubmit>
+            </form>
+          )}
+        </div>
       </div>
 
       <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-6">

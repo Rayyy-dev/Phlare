@@ -270,3 +270,14 @@ PII-free, consistent with the no-credential-capture stance. One result per
   builder (CRUD), recipient takes it on the teachable page, graded server-side,
   storing chosen indices only + QUIZ_COMPLETED (D14). Seeded one built-in quiz.
   No schema change required. Verified end-to-end (15/15).
+- **Phase 6 (analytics, reporting, exports & risk scoring).** Org- and
+  campaign-level metrics (delivered, open/click/submit/report rates, phish-prone
+  %), a since-launch time-series, per-department breakdown, and repeat-clicker
+  flagging — charts with Recharts (greyscale-friendly). Transparent risk score
+  (`src/server/risk/`) per docs/risk-scoring.md, cached on `Recipient.riskScore`
+  and refreshed by a worker job (debounced after events + periodic, bounded write
+  concurrency). CSV export (dependency-free serialiser) and a print-friendly
+  report route rendered to PDF via Playwright/Chromium (forwards the admin
+  session cookie). No schema change. Verified end-to-end (18/18) — metrics,
+  department breakdown, repeat clickers, all three risk scores matching the
+  formula, CSV, and a 60 KB PDF.

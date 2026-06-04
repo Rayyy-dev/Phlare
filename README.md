@@ -138,7 +138,10 @@ running log.
   records LEARN_VIEWED and names the specific red flags + landing page used;
   optional per-campaign knowledge-check quiz (admin builder) graded server-side,
   storing chosen indices only + QUIZ_COMPLETED.
-- ⏳ Phase 6 — Analytics, exports, risk scoring
+- ✅ **Phase 6 — Analytics, exports & risk scoring**: org/campaign dashboards
+  (rates, phish-prone %, time-series, department & repeat-clicker breakdowns) with
+  Recharts; transparent cached risk score refreshed by a worker; CSV export and a
+  Playwright-rendered PDF report.
 - ⏳ Phase 7 — Hardening, tests, seed/demo harness
 
 ---

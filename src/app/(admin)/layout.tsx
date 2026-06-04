@@ -21,7 +21,7 @@ const NAV: { href: string; label: string; phase?: number }[] = [
   { href: "/quizzes", label: "Quizzes" },
   { href: "/sending-profiles", label: "Sending Profiles" },
   { href: "/campaigns", label: "Campaigns" },
-  { href: "/analytics", label: "Analytics", phase: 6 },
+  { href: "/analytics", label: "Analytics" },
   { href: "/settings", label: "Settings", phase: 6 },
 ];
 

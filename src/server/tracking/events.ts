@@ -1,4 +1,5 @@
 import { prisma } from "@/server/db";
+import { enqueueRiskRefresh } from "@/worker/queues";
 import type { EventType, Prisma } from "@prisma/client";
 
 /**
@@ -44,6 +45,9 @@ async function recordFirst(
       metadata,
     },
   });
+
+  // This interaction changes the recipient's risk; trigger a debounced recompute.
+  await enqueueRiskRefresh().catch(() => {});
 }
 
 export function recordOpen(token: string, userAgent?: string | null) {

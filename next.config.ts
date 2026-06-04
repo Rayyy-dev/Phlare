@@ -9,7 +9,7 @@ const nextConfig: NextConfig = {
   outputFileTracingRoot: __dirname,
   // argon2 and nodemailer are native/Node-only — keep them external to the
   // server bundle so they are required at runtime rather than bundled.
-  serverExternalPackages: ["argon2", "@prisma/client", "bullmq", "nodemailer"],
+  serverExternalPackages: ["argon2", "@prisma/client", "bullmq", "nodemailer", "playwright"],
   // Security headers applied to every response (defence-in-depth, see docs/security.md).
   async headers() {
     return [

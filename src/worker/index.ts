@@ -1,6 +1,7 @@
 import { Worker } from "bullmq";
-import { connection, QUEUE_NAMES } from "./queues";
+import { connection, riskQueue, QUEUE_NAMES } from "./queues";
 import { processSend, processScheduledLaunch } from "@/server/campaigns/send-runner";
+import { refreshAllRiskScores } from "@/server/risk/service";
 
 /**
  * Background worker entrypoint. Runs as a separate process/container from the
@@ -26,6 +27,15 @@ const scheduleWorker = new Worker(
   { connection }
 );
 
+const riskWorker = new Worker(
+  QUEUE_NAMES.risk,
+  async () => {
+    const n = await refreshAllRiskScores();
+    console.log(`[worker:risk] recomputed risk scores for ${n} recipients`);
+  },
+  { connection }
+);
+
 // Data-retention cleanup is implemented in Phase 7; the queue is wired now.
 const retentionWorker = new Worker(
   QUEUE_NAMES.retention,
@@ -35,14 +45,19 @@ const retentionWorker = new Worker(
   { connection }
 );
 
-for (const w of [sendWorker, scheduleWorker, retentionWorker]) {
+for (const w of [sendWorker, scheduleWorker, riskWorker, retentionWorker]) {
   w.on("ready", () => console.log(`[worker] queue "${w.name}" ready`));
   w.on("failed", (job, err) => console.error(`[worker] job ${job?.id} failed:`, err));
 }
 
+// Periodic safety-net recompute (event-driven debounced refresh is the primary path).
+riskQueue
+  .upsertJobScheduler("risk-periodic", { every: 120_000 }, { name: "refresh" })
+  .catch((err) => console.error("[worker] failed to schedule risk refresh:", err));
+
 async function shutdown() {
   console.log("[worker] shutting down…");
-  await Promise.all([sendWorker.close(), scheduleWorker.close(), retentionWorker.close()]);
+  await Promise.all([sendWorker.close(), scheduleWorker.close(), riskWorker.close(), retentionWorker.close()]);
   process.exit(0);
 }
 
