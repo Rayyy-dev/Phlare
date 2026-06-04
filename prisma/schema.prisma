@@ -1,0 +1,408 @@
+// ─────────────────────────────────────────────────────────────────────────────
+// Phlare — database schema
+// See docs/database-schema.md for the narrative ERD and rationale.
+//
+// Ethical-design invariants encoded here:
+//  * `Event.metadata` for SUBMITTED events stores submitted FIELD NAMES ONLY —
+//    never the values the recipient typed (especially passwords). See Section 7.1.
+//  * Tracking is via `CampaignTarget.trackingToken`, a 32-byte unguessable token
+//    (defends against IDOR / enumeration).
+// ─────────────────────────────────────────────────────────────────────────────
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// Auto-generates the ERD figure straight from this schema, so the diagram can
+// never drift from the real model. We emit a Mermaid markdown file (no headless
+// browser needed here — safe in the Docker build); `npm run diagrams` then
+// renders it to SVG + PNG with the same theme as the other figures.
+// Gated by DISABLE_ERD so `prisma generate` stays fast in CI/containers.
+generator erd {
+  provider = "prisma-erd-generator"
+  output   = "../docs/diagrams/erd.md"
+  disabled = false
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ── Authentication & admin ───────────────────────────────────────────────────
+
+model Admin {
+  id                  String    @id @default(cuid())
+  email               String    @unique
+  passwordHash        String
+  name                String
+  isActive            Boolean   @default(true)
+  failedLoginAttempts Int       @default(0)
+  lockedUntil         DateTime?
+  lastLoginAt         DateTime?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  sessions            Session[]
+  passwordResets      PasswordResetToken[]
+  createdCampaigns    Campaign[]           @relation("CampaignCreatedBy")
+  authorizedCampaigns Campaign[]           @relation("CampaignAuthorizedBy")
+  auditEntries        AuditLog[]
+
+  @@map("admins")
+}
+
+// Server-side sessions. The cookie holds a raw random token; we store only its
+// SHA-256 hash as the primary key, so a DB leak cannot reconstruct live cookies.
+model Session {
+  id        String   @id // sha256(token)
+  adminId   String
+  admin     Admin    @relation(fields: [adminId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  ip        String?
+  userAgent String?
+  createdAt DateTime @default(now())
+
+  @@index([adminId])
+  @@map("sessions")
+}
+
+model PasswordResetToken {
+  id        String    @id @default(cuid())
+  adminId   String
+  admin     Admin     @relation(fields: [adminId], references: [id], onDelete: Cascade)
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([adminId])
+  @@map("password_reset_tokens")
+}
+
+// ── Recipients & grouping ────────────────────────────────────────────────────
+
+model Recipient {
+  id         String    @id @default(cuid())
+  firstName  String
+  lastName   String
+  email      String
+  department String?
+  position   String?
+  // Transparent risk score (0–100), refreshed by the worker. See docs/risk-scoring.md.
+  riskScore  Float     @default(0)
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  deletedAt  DateTime? // soft-delete preserves campaign history
+
+  memberships     GroupMember[]
+  campaignTargets CampaignTarget[]
+
+  @@unique([email]) // de-duplication; reactivation handled in application layer
+  @@index([deletedAt])
+  @@map("recipients")
+}
+
+model Group {
+  id          String    @id @default(cuid())
+  name        String    @unique
+  description String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+
+  members           GroupMember[]
+  campaignTargeting CampaignGroup[]
+
+  @@map("groups")
+}
+
+model GroupMember {
+  groupId     String
+  group       Group     @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  recipientId String
+  recipient   Recipient @relation(fields: [recipientId], references: [id], onDelete: Cascade)
+  addedAt     DateTime  @default(now())
+
+  @@id([groupId, recipientId])
+  @@index([recipientId])
+  @@map("group_members")
+}
+
+// ── Content: templates, landing pages, quizzes ───────────────────────────────
+
+enum Difficulty {
+  EASY
+  MEDIUM
+  HARD
+}
+
+// Psychological principle the template exercises — ties the tool back to the
+// social-engineering theory in the thesis literature review.
+enum PsychPrinciple {
+  AUTHORITY
+  URGENCY
+  SOCIAL_PROOF
+  RECIPROCITY
+  LIKING
+  CURIOSITY_FEAR
+}
+
+model EmailTemplate {
+  id          String         @id @default(cuid())
+  name        String
+  subject     String
+  senderName  String // generic/fictional display name, e.g. "IT Helpdesk"
+  senderEmail String // generic/fictional address, e.g. "helpdesk@acme-corp.example"
+  htmlBody    String
+  textBody    String?
+  difficulty  Difficulty     @default(MEDIUM)
+  principle   PsychPrinciple @default(AUTHORITY)
+  // Structured list of the red flags present in THIS template; drives the
+  // teachable-moment page so education is specific to what the recipient saw.
+  redFlags    Json           @default("[]")
+  isBuiltin   Boolean        @default(false)
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  deletedAt   DateTime?
+
+  campaigns Campaign[]
+  quizzes   Quiz[]
+
+  @@map("email_templates")
+}
+
+model LandingPage {
+  id        String    @id @default(cuid())
+  name      String
+  htmlBody  String
+  hasForm   Boolean   @default(true)
+  // Field definitions: [{ name, label, type }]. We render the form from this and
+  // record only which field NAMES were submitted — never their values.
+  fieldDefs Json      @default("[]")
+  difficulty Difficulty @default(MEDIUM)
+  isBuiltin Boolean   @default(false)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  campaigns Campaign[]
+
+  @@map("landing_pages")
+}
+
+model Quiz {
+  id        String   @id @default(cuid())
+  title     String
+  templateId String?
+  template   EmailTemplate? @relation(fields: [templateId], references: [id], onDelete: SetNull)
+  // Questions: [{ q, options: string[], correctIndex, explanation }].
+  questions Json     @default("[]")
+  createdAt DateTime @default(now())
+
+  campaigns Campaign[]
+  results   QuizResult[]
+
+  @@map("quizzes")
+}
+
+model QuizResult {
+  id               String   @id @default(cuid())
+  quizId           String
+  quiz             Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  campaignTargetId String
+  campaignTarget   CampaignTarget @relation(fields: [campaignTargetId], references: [id], onDelete: Cascade)
+  score            Int
+  total            Int
+  answers          Json     @default("[]") // selected option indices only — no PII
+  completedAt      DateTime @default(now())
+
+  @@index([quizId])
+  @@index([campaignTargetId])
+  @@map("quiz_results")
+}
+
+// ── Sending profiles (SMTP) ──────────────────────────────────────────────────
+
+enum SmtpSecurity {
+  NONE
+  STARTTLS
+  SSL
+}
+
+model SendingProfile {
+  id                String       @id @default(cuid())
+  name              String
+  host              String
+  port              Int
+  username          String?
+  // AES-256-GCM ciphertext of the SMTP password (iv:tag:ciphertext). Never plaintext.
+  passwordCiphertext String?
+  security          SmtpSecurity @default(STARTTLS)
+  fromName          String
+  fromEmail         String
+  lastTestedAt      DateTime?
+  lastTestOk        Boolean?
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+  deletedAt         DateTime?
+
+  campaigns Campaign[]
+
+  @@map("sending_profiles")
+}
+
+// ── Campaign engine ──────────────────────────────────────────────────────────
+
+enum CampaignStatus {
+  DRAFT
+  SCHEDULED
+  RUNNING
+  PAUSED
+  COMPLETED
+  STOPPED
+}
+
+model Campaign {
+  id              String         @id @default(cuid())
+  name            String
+  status          CampaignStatus @default(DRAFT)
+
+  emailTemplateId String
+  emailTemplate   EmailTemplate  @relation(fields: [emailTemplateId], references: [id])
+  landingPageId   String
+  landingPage     LandingPage    @relation(fields: [landingPageId], references: [id])
+  sendingProfileId String
+  sendingProfile  SendingProfile @relation(fields: [sendingProfileId], references: [id])
+  quizId          String?
+  quiz            Quiz?          @relation(fields: [quizId], references: [id], onDelete: SetNull)
+
+  scheduledAt        DateTime?
+  launchedAt         DateTime?
+  completedAt        DateTime?
+  throttlePerMinute  Int        @default(60)
+
+  // Authorization gate (Section 7.2): admin must affirm authorization to launch.
+  authorizationAck Boolean   @default(false)
+  authorizedById   String?
+  authorizedBy     Admin?    @relation("CampaignAuthorizedBy", fields: [authorizedById], references: [id])
+  authorizedAt     DateTime?
+
+  createdById String
+  createdBy   Admin    @relation("CampaignCreatedBy", fields: [createdById], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  deletedAt   DateTime?
+
+  targets   CampaignTarget[]
+  groups    CampaignGroup[]
+
+  @@index([status])
+  @@map("campaigns")
+}
+
+// Many-to-many: which groups a campaign targets (snapshot expanded into targets).
+model CampaignGroup {
+  campaignId String
+  campaign   Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  groupId    String
+  group      Group    @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  @@id([campaignId, groupId])
+  @@map("campaign_groups")
+}
+
+enum TargetStatus {
+  PENDING
+  SENT
+  FAILED
+  BOUNCED
+}
+
+// One row per (campaign, recipient): carries the unique tracking token and
+// denormalised first-event timestamps for cheap analytics + idempotency.
+model CampaignTarget {
+  id            String       @id @default(cuid())
+  campaignId    String
+  campaign      Campaign     @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  recipientId   String
+  recipient     Recipient    @relation(fields: [recipientId], references: [id])
+  trackingToken String       @unique // 32-byte base64url, unguessable
+  status        TargetStatus @default(PENDING)
+  sentAt        DateTime?
+  sendError     String?
+
+  // Denormalised "first occurrence" markers — make open/click idempotent and
+  // keep phish-prone% queries index-friendly.
+  firstOpenedAt    DateTime?
+  firstClickedAt   DateTime?
+  firstSubmittedAt DateTime?
+  reportedAt       DateTime?
+
+  events      Event[]
+  quizResults QuizResult[]
+
+  @@unique([campaignId, recipientId])
+  @@index([status])
+  @@map("campaign_targets")
+}
+
+// ── Tracking events ──────────────────────────────────────────────────────────
+
+enum EventType {
+  SENT
+  OPENED
+  CLICKED
+  SUBMITTED
+  REPORTED
+  LEARN_VIEWED
+  QUIZ_COMPLETED
+}
+
+model Event {
+  id               String         @id @default(cuid())
+  campaignTargetId String
+  campaignTarget   CampaignTarget @relation(fields: [campaignTargetId], references: [id], onDelete: Cascade)
+  type             EventType
+  occurredAt       DateTime       @default(now())
+  userAgent        String? // truncated; data minimisation
+  ipPrefix         String? // coarse/optional, never a full address
+  // For SUBMITTED: { fields: ["username","password"] } — NAMES ONLY, never values.
+  metadata         Json?
+
+  @@index([campaignTargetId, type])
+  @@index([occurredAt])
+  @@map("events")
+}
+
+// ── Settings & audit ─────────────────────────────────────────────────────────
+
+// Singleton configuration row (id is always "singleton").
+model Settings {
+  id                      String   @id @default("singleton")
+  orgName                 String   @default("Acme Corp")
+  baseUrl                 String   @default("http://localhost:3000")
+  defaultThrottlePerMinute Int     @default(60)
+  retentionDays           Int      @default(365)
+  reportEmail             String?
+  setupCompleted          Boolean  @default(false)
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
+
+  @@map("settings")
+}
+
+model AuditLog {
+  id           String   @id @default(cuid())
+  actorAdminId String?
+  actor        Admin?   @relation(fields: [actorAdminId], references: [id], onDelete: SetNull)
+  action       String // e.g. "campaign.launched", "recipients.imported"
+  entityType   String?
+  entityId     String?
+  details      Json?
+  createdAt    DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([actorAdminId])
+  @@map("audit_log")
+}

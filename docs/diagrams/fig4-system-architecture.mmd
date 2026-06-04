@@ -1,0 +1,51 @@
+%%{init: {"theme":"neutral","themeVariables":{"fontFamily":"Helvetica, Arial, sans-serif","fontSize":"14px","lineColor":"#222","primaryColor":"#f2f2f2","primaryBorderColor":"#222","primaryTextColor":"#111","clusterBkg":"#fafafa","clusterBorder":"#888"},"flowchart":{"curve":"basis","nodeSpacing":40,"rankSpacing":50,"padding":8}}}%%
+flowchart TB
+    %% Figure 4 — System concept / architecture (reflects the Phase 1 implementation)
+    %% Left band = admin-driven configuration & sending.
+    %% Right band = recipient-driven tracking + just-in-time learning loop.
+
+    subgraph ADMIN_SIDE["Admin-driven (authenticated)"]
+        direction TB
+        ADM(["Security manager"])
+        APP["Next.js app<br/>Admin UI + Campaign engine"]
+        Q[["Redis · BullMQ<br/>job queue"]]
+        WK["Worker process<br/>Email sender (Nodemailer)"]
+        ADM --> APP
+        APP -- "enqueue throttled<br/>send jobs" --> Q
+        Q --> WK
+    end
+
+    DB[("PostgreSQL · Prisma<br/>recipients · campaigns ·<br/>events · audit log")]
+    MP["Mailpit<br/>mail-catcher (SMTP)"]
+
+    APP -- "read / write" --> DB
+    WK -- "SMTP send" --> MP
+
+    subgraph RECIP_SIDE["Recipient-driven (public, tokenised)"]
+        direction TB
+        INBOX["Recipient inbox<br/>(simulated email)"]
+        PX["/t/o/:token<br/>open pixel/"]
+        CLK["/t/c/:token<br/>link click/"]
+        LP["Landing page<br/>(fake form)"]
+        SUB["/t/s/:token<br/>submit — field NAMES only/"]
+        TEACH["Teachable-moment page<br/>red flags + optional quiz"]
+    end
+
+    MP --> INBOX
+    INBOX -- "image load" --> PX
+    INBOX -- "clicks link" --> CLK
+    CLK --> LP
+    LP -- "submits" --> SUB
+
+    %% every tracked interaction is recorded once (idempotent)
+    PX -- "record OPENED" --> DB
+    CLK -- "record CLICKED" --> DB
+    SUB -- "record SUBMITTED" --> DB
+
+    %% just-in-time learning loop: never a dead end
+    CLK --> TEACH
+    SUB --> TEACH
+    TEACH -- "educates the recipient<br/>(just-in-time loop)" --> INBOX
+
+    style TEACH fill:#e9eefc,stroke:#111,stroke-width:3px;
+    style DB fill:#ffffff,stroke:#111,stroke-width:2px;

@@ -1,0 +1,18 @@
+%%{init: {"theme":"neutral","themeVariables":{"fontFamily":"Helvetica, Arial, sans-serif","fontSize":"15px","lineColor":"#222","primaryColor":"#f2f2f2","primaryBorderColor":"#222","primaryTextColor":"#111"},"flowchart":{"curve":"linear","nodeSpacing":40,"rankSpacing":55,"padding":10}}}%%
+flowchart TB
+    %% Figure 8 — Peffers et al. Design Science Research Methodology (DSRM)
+    %% mapped to the thesis chapters that carry out each activity.
+    %% Six activities in sequence; entry point is problem-centred.
+
+    ENTRY(["Entry point: problem-centred initiation"])
+
+    ENTRY --> A1
+
+    A1["1 · Problem identification & motivation<br/>— Introduction &amp; Chapter 1"]
+    A2["2 · Define objectives of a solution<br/>— Chapter 2 (requirements)"]
+    A3["3 · Design &amp; development<br/>— Chapters 3 &amp; 4"]
+    A4["4 · Demonstration<br/>— Chapter 5"]
+    A5["5 · Evaluation<br/>— Chapter 5"]
+    A6["6 · Communication<br/>— Thesis &amp; documentation"]
+
+    A1 --> A2 --> A3 --> A4 --> A5 --> A6

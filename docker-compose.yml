@@ -1,0 +1,85 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Phlare — one-command deploy.  `docker compose up` brings up the full stack:
+#   web (Next.js)  ·  worker (BullMQ)  ·  postgres  ·  redis  ·  mailpit
+# Configure via `.env` (copy from `.env.example`).
+# ─────────────────────────────────────────────────────────────────────────────
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-phlare}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-phlare_dev_password}
+      POSTGRES_DB: ${POSTGRES_DB:-phlare}
+    volumes:
+      - phlare_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-phlare}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    ports:
+      - "5432:5432"
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    ports:
+      - "6379:6379"
+
+  # Local mail-catcher: captures every simulated email so a full campaign can be
+  # demonstrated without a live mail server. Web UI on :8025.
+  mailpit:
+    image: axllent/mailpit:latest
+    restart: unless-stopped
+    ports:
+      - "1025:1025" # SMTP
+      - "8025:8025" # Web UI
+
+  web:
+    build:
+      context: .
+      target: runtime
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      APP_BASE_URL: ${APP_BASE_URL:-http://localhost:3000}
+      DATABASE_URL: postgresql://${POSTGRES_USER:-phlare}:${POSTGRES_PASSWORD:-phlare_dev_password}@postgres:5432/${POSTGRES_DB:-phlare}?schema=public
+      REDIS_URL: redis://redis:6379
+      SESSION_SECRET: ${SESSION_SECRET}
+      APP_ENCRYPTION_KEY: ${APP_ENCRYPTION_KEY}
+    # Apply migrations, then start the standalone server.
+    command: sh -c "npx prisma migrate deploy && node server.js"
+    ports:
+      - "3000:3000"
+
+  worker:
+    build:
+      context: .
+      target: runtime
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      APP_BASE_URL: ${APP_BASE_URL:-http://localhost:3000}
+      DATABASE_URL: postgresql://${POSTGRES_USER:-phlare}:${POSTGRES_PASSWORD:-phlare_dev_password}@postgres:5432/${POSTGRES_DB:-phlare}?schema=public
+      REDIS_URL: redis://redis:6379
+      APP_ENCRYPTION_KEY: ${APP_ENCRYPTION_KEY}
+    command: sh -c "node_modules/.bin/tsx src/worker/index.ts"
+
+volumes:
+  phlare_pgdata:

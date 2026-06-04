@@ -1,0 +1,56 @@
+%%{init: {"theme":"neutral","themeVariables":{"fontFamily":"Helvetica, Arial, sans-serif","fontSize":"15px","lineColor":"#222","primaryColor":"#f2f2f2","primaryBorderColor":"#222","primaryTextColor":"#111","clusterBkg":"#fafafa","clusterBorder":"#888"},"flowchart":{"curve":"basis","nodeSpacing":45,"rankSpacing":55,"padding":8}}}%%
+flowchart TB
+    %% Figure 2 — Phishing Threat Ecosystem (Chapter 1, conceptual)
+    %% Read top-to-bottom: WHO attacks -> THROUGH which channel -> EXPLOITING which
+    %% human trigger -> RESULTING IN which organizational impact.
+
+    subgraph TIER["① Attacker tier — who"]
+        direction LR
+        A1["Individual /<br/>script-kiddie"]
+        A2["Organized<br/>crime"]
+        A3["State-<br/>sponsored"]
+    end
+
+    subgraph CHAN["② Attack channels — how"]
+        direction LR
+        C1["Mass email<br/>phishing"]
+        C2["Spear<br/>phishing"]
+        C3["Vishing /<br/>smishing"]
+    end
+
+    subgraph TRIG["③ Human triggers exploited — why it works"]
+        direction LR
+        H1["Curiosity"]
+        H2["Urgency /<br/>scarcity"]
+        H3["Authority"]
+        H4["Fear"]
+    end
+
+    subgraph IMPACT["④ Organizational impact — outcome"]
+        direction LR
+        I1["Reputational<br/>damage"]
+        I2["Data<br/>breach"]
+        I3["Financial<br/>loss"]
+    end
+
+    %% WHO -> HOW (each tier's characteristic channel)
+    A1 -- "opportunistic,<br/>high volume" --> C1
+    A2 -- "profit-driven,<br/>targeted" --> C2
+    A3 -- "covert,<br/>persistent" --> C2
+    A2 -- "fraud calls /<br/>SMS" --> C3
+    A3 -- "multi-channel" --> C3
+
+    %% HOW -> WHY (the psychological lever each channel pulls)
+    C1 -- "enticing lure" --> H1
+    C1 -- "deadline pressure" --> H2
+    C2 -- "impersonates a<br/>trusted figure" --> H3
+    C2 -- "limited-time ask" --> H2
+    C3 -- "threat /<br/>consequence" --> H4
+
+    %% WHY -> OUTCOME (deception succeeds, harm follows)
+    H1 -- "click" --> I2
+    H2 -- "act in haste" --> I2
+    H3 -- "comply" --> I2
+    H4 -- "panic" --> I2
+    I2 -- "loss of trust" --> I1
+    I2 -- "remediation +<br/>fines" --> I3

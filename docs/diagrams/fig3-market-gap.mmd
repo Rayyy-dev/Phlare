@@ -1,0 +1,30 @@
+%%{init: {"theme":"neutral","themeVariables":{"fontFamily":"Helvetica, Arial, sans-serif","fontSize":"15px","lineColor":"#222","primaryColor":"#f2f2f2","primaryBorderColor":"#222","primaryTextColor":"#111","clusterBkg":"#fafafa","clusterBorder":"#888"},"flowchart":{"curve":"basis","nodeSpacing":50,"rankSpacing":55,"padding":10}}}%%
+flowchart TB
+    %% Figure 3 — The Market Gap (Chapter 1, conceptual)
+    %% Two existing classes of solution each exclude SMEs for a different reason,
+    %% leaving a gap. Phlare is positioned as the solution that fills it.
+
+    subgraph EXISTING["Existing solution classes"]
+        direction LR
+        ENT["<b>Enterprise platforms</b><br/>KnowBe4 · Proofpoint · Cofense<br/><i>comprehensive, turnkey</i>"]
+        OSS["<b>Open-source tools</b><br/>Gophish · King Phisher<br/><i>free, flexible</i>"]
+    end
+
+    ENT -- "barrier:<br/>high cost — $1000s / year" --> GAP
+    OSS -- "barrier:<br/>high technical complexity<br/>self-hosted mail, no content" --> GAP
+
+    GAP{{"<b>The SME gap</b><br/>limited budget +<br/>limited security staff"}}
+
+    GAP -- "left underserved" --> SME["Small & medium<br/>enterprises (SMEs)"]
+
+    PHLARE["<b>Phlare</b><br/>self-hosted phishing-simulation<br/>& awareness platform"]
+
+    PHLARE -- "low cost<br/>(self-hosted)" --> GAP
+    PHLARE -- "one-command<br/>deployment" --> GAP
+    PHLARE -- "built-in training<br/>content + micro-learning" --> GAP
+
+    GAP -. "now reachable" .-> SME
+
+    %% Phlare emphasised with a heavier border so it stands out even in greyscale print
+    style PHLARE fill:#e9eefc,stroke:#111,stroke-width:3px;
+    style GAP fill:#ffffff,stroke:#111,stroke-width:2px;
