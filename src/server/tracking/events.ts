@@ -71,6 +71,31 @@ export function recordReport(token: string, userAgent?: string | null) {
   return recordFirst(token, "reportedAt", "REPORTED", undefined, { userAgent });
 }
 
+/**
+ * Record an event at most once per target (used for LEARN_VIEWED, which has no
+ * dedicated `first…At` column). Safe on unknown tokens (no-op). There is a tiny
+ * race window on concurrent first-views; a duplicate learn view is harmless.
+ */
+export async function recordEventOnce(
+  token: string,
+  type: EventType,
+  userAgent?: string | null
+): Promise<void> {
+  const target = await prisma.campaignTarget.findUnique({
+    where: { trackingToken: token },
+    select: { id: true },
+  });
+  if (!target) return;
+  const existing = await prisma.event.findFirst({
+    where: { campaignTargetId: target.id, type },
+    select: { id: true },
+  });
+  if (existing) return;
+  await prisma.event.create({
+    data: { campaignTargetId: target.id, type, userAgent: userAgent?.slice(0, 255) ?? null },
+  });
+}
+
 /** Load the target + the content needed to render a click/landing/learn page. */
 export function getTargetForRender(token: string) {
   return prisma.campaignTarget.findUnique({

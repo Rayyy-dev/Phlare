@@ -18,6 +18,7 @@ const NAV: { href: string; label: string; phase?: number }[] = [
   { href: "/groups", label: "Groups" },
   { href: "/templates", label: "Email Templates" },
   { href: "/landing-pages", label: "Landing Pages" },
+  { href: "/quizzes", label: "Quizzes" },
   { href: "/sending-profiles", label: "Sending Profiles" },
   { href: "/campaigns", label: "Campaigns" },
   { href: "/analytics", label: "Analytics", phase: 6 },

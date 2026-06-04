@@ -134,7 +134,10 @@ running log.
   expansion with unguessable tokens, the BullMQ send pipeline (personalization +
   open pixel + tokenized link), and the public tracking routes. Form submissions
   record field names only — typed values are never stored or logged.
-- ⏳ Phase 5 — Just-in-time learning + quiz
+- ✅ **Phase 5 — Just-in-time learning & quiz**: the teachable-moment page
+  records LEARN_VIEWED and names the specific red flags + landing page used;
+  optional per-campaign knowledge-check quiz (admin builder) graded server-side,
+  storing chosen indices only + QUIZ_COMPLETED.
 - ⏳ Phase 6 — Analytics, exports, risk scoring
 - ⏳ Phase 7 — Hardening, tests, seed/demo harness
 

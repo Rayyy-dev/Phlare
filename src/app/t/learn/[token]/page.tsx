@@ -1,13 +1,16 @@
-import { getTargetForRender } from "@/server/tracking/events";
+import { headers } from "next/headers";
+import { getTargetForRender, recordEventOnce } from "@/server/tracking/events";
+import { getQuizForToken } from "@/server/quizzes/service";
+import { QuizRunner } from "./QuizRunner";
 
 export const dynamic = "force-dynamic";
 
 /**
  * Teachable-moment page — the just-in-time micro-learning landing point after a
  * click or submission. Every simulated interaction ends here (never a dead end).
- * Phase 4 ships the disclosure + the specific red flags from the template that
- * fooled the recipient; Phase 5 adds the knowledge-check quiz and records
- * LEARN_VIEWED / QUIZ_COMPLETED.
+ * Discloses the exercise, explains the specific red flags from the template that
+ * fooled the recipient and the landing page they reached, records LEARN_VIEWED,
+ * and presents the campaign's knowledge-check quiz when one is attached.
  */
 export default async function LearnPage({
   params,
@@ -15,8 +18,15 @@ export default async function LearnPage({
   params: Promise<{ token: string }>;
 }) {
   const { token } = await params;
-  const target = await getTargetForRender(token);
+  const ua = (await headers()).get("user-agent");
+  await recordEventOnce(token, "LEARN_VIEWED", ua).catch(() => {});
+
+  const [target, quiz] = await Promise.all([
+    getTargetForRender(token),
+    getQuizForToken(token).catch(() => null),
+  ]);
   const redFlags = (target?.campaign.emailTemplate.redFlags as string[] | undefined) ?? [];
+  const landingName = target?.campaign.landingPage.name;
 
   return (
     <main className="mx-auto flex min-h-screen max-w-xl flex-col justify-center px-4 py-10">
@@ -52,11 +62,30 @@ export default async function LearnPage({
           </p>
         )}
 
+        {landingName && (
+          <p className="rounded-md bg-slate-50 px-4 py-3 text-sm text-slate-600">
+            The link led to a fake <strong>{landingName}</strong> page designed to
+            collect credentials. A genuine sign-in page is reached by typing the
+            address yourself — not by following an email link.
+          </p>
+        )}
+
         <p className="text-xs text-slate-400">
           If you receive a message like this for real, report it to your IT or
           security team.
         </p>
       </div>
+
+      {quiz && (
+        <div className="card mt-6">
+          <QuizRunner
+            token={token}
+            title={quiz.title}
+            questions={quiz.questions}
+            alreadyAnswered={quiz.alreadyAnswered}
+          />
+        </div>
+      )}
     </main>
   );
 }

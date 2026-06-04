@@ -171,6 +171,35 @@ async function seedBuiltInContent() {
     });
     console.log("[seed] created 2 built-in landing pages.");
   }
+
+  if ((await prisma.quiz.count()) === 0) {
+    await prisma.quiz.create({
+      data: {
+        title: "Spot the phishing red flags",
+        questions: [
+          {
+            q: "An email urges you to act 'today' or lose access. What is this?",
+            options: ["A normal reminder", "An urgency tactic used in phishing", "A system requirement"],
+            correctIndex: 1,
+            explanation: "Manufactured urgency pressures you to act before thinking — a classic phishing lever.",
+          },
+          {
+            q: "The safest way to reach your account's real sign-in page is to:",
+            options: ["Click the link in the email", "Type the address yourself or use a saved bookmark", "Reply asking if it's genuine"],
+            correctIndex: 1,
+            explanation: "Never trust the link. Navigate to the site yourself so a look-alike page can't intercept you.",
+          },
+          {
+            q: "A sender address like helpdesk@acme-corp-it.example is suspicious because:",
+            options: ["It is too long", "It mimics but does not match the real domain", "It uses lowercase letters"],
+            correctIndex: 1,
+            explanation: "Attackers register look-alike domains. Check the domain after the @ carefully.",
+          },
+        ],
+      },
+    });
+    console.log("[seed] created 1 built-in quiz.");
+  }
 }
 
 main()

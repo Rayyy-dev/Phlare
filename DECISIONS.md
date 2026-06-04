@@ -220,6 +220,18 @@ IDs, hence the `-` separator.)
 mid-flight throttle change would require re-enqueueing (not needed for the
 current scope).
 
+## D14 — Quizzes graded server-side; answer key never sent to the client
+
+**Decision.** The recipient's quiz page receives questions and options only — not
+the correct-answer indices. Grading happens server-side in `gradeAndStore`, which
+persists only the chosen option **indices** (never free text) on `QuizResult`,
+tied to the `CampaignTarget`, and records `QUIZ_COMPLETED` once.
+
+**Rationale.** Keeps the correct answers off the wire (a recipient can't read the
+key from page source before answering) and keeps the stored data minimal and
+PII-free, consistent with the no-credential-capture stance. One result per
+(target, quiz) keeps analytics clean.
+
 ## Phase log
 
 - **Phase 1 (foundation).** Scaffolded the app; implemented the setup wizard,
@@ -252,3 +264,9 @@ current scope).
   unknown tokens. **Ethical invariant now live in code: form submissions record
   field NAMES only; typed values are never read, stored, or logged** (verified
   end-to-end, 23/23 checks). No schema change required.
+- **Phase 5 (just-in-time learning & quiz).** Teachable-moment page records
+  LEARN_VIEWED and explains the specific red flags from the template plus the
+  landing page used. Optional per-campaign knowledge-check quiz: admin quiz
+  builder (CRUD), recipient takes it on the teachable page, graded server-side,
+  storing chosen indices only + QUIZ_COMPLETED (D14). Seeded one built-in quiz.
+  No schema change required. Verified end-to-end (15/15).

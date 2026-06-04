@@ -9,7 +9,7 @@ Maps to the thesis chapter on ethical and legal considerations. Phlare is a
 |---|---|---|
 | 1 | **No real credential capture** | ✅ Live: the submit route (`t/s/[token]`) reads only `formData().keys()` (field **names**) and records those; the typed values are never read, stored, or logged. Verified end-to-end (a planted password value appears nowhere in the database). |
 | 2 | **Authorization gate** | ✅ Live: a campaign cannot launch until the admin affirms authorisation; the acknowledgement (`authorizationAck`, `authorizedBy`, `authorizedAt`) is recorded and a launch without it is refused. |
-| 3 | **Clear simulation disclosure** | Every teachable-moment page states it was an authorised internal exercise (Phase 5). |
+| 3 | **Clear simulation disclosure** | ✅ Live: every teachable-moment page states it was an authorised internal security-awareness exercise and that nothing typed was stored. |
 | 4 | **Generic, non-branded templates** | The seeded library uses fictional brands ("Acme Corp / IT Helpdesk"); no real logos or trademarked login clones (Phase 3). |
 | 5 | **Data minimisation & retention** | Only analytics-necessary data is collected; `userAgent` truncated, IP coarse/optional; configurable `retentionDays` with a scheduled cleanup job (Phases 4/7). |
 | 6 | **The platform itself is secure** | See §2. |

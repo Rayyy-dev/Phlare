@@ -150,6 +150,29 @@ export const campaignSchema = z.object({
 
 export type CampaignInput = z.infer<typeof campaignSchema>;
 
+// ── Quizzes ──────────────────────────────────────────────────────────────────
+
+export const quizQuestionSchema = z
+  .object({
+    q: z.string().trim().min(1, "Question text is required.").max(500),
+    options: z.array(z.string().trim().min(1).max(300)).min(2, "At least two options.").max(4),
+    correctIndex: z.coerce.number().int().min(0),
+    explanation: optionalText(1000),
+  })
+  .refine((d) => d.correctIndex < d.options.length, {
+    message: "The correct answer must be one of the options.",
+    path: ["correctIndex"],
+  });
+
+export const quizSchema = z.object({
+  title: z.string().trim().min(1, "Title is required.").max(160),
+  templateId: optionalText(60),
+  questions: z.array(quizQuestionSchema).min(1, "Add at least one question.").max(10),
+});
+
+export type QuizQuestionInput = z.infer<typeof quizQuestionSchema>;
+export type QuizInput = z.infer<typeof quizSchema>;
+
 export type EmailTemplateInput = z.infer<typeof emailTemplateSchema>;
 export type LandingFieldDef = z.infer<typeof landingFieldSchema>;
 export type LandingPageInput = z.infer<typeof landingPageSchema>;
