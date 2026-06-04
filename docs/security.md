@@ -23,7 +23,7 @@ Maps to the thesis chapter on ethical and legal considerations. Phlare is a
 | **Session theft** | httpOnly + SameSite=Lax + Secure (prod) cookies; only `sha256(token)` stored, so a DB leak can't reconstruct cookies; instant server-side revocation. ✅ Phase 1 |
 | **Secrets at rest** | SMTP passwords AES-256-GCM encrypted; app secrets in `.env`, never committed. ✅ Phase 1 |
 | **IDOR on tracking** | 32-byte unguessable tokens; no sequential IDs in public URLs. ✅ schema; endpoints Phase 4 |
-| **XSS** (template/landing HTML) | Server-side sanitisation (isomorphic-DOMPurify) before rendering; strict whitelisted personalisation variables (no template injection). ⏳ Phase 3 |
+| **XSS** (template/landing HTML) | Server-side sanitisation (`sanitize-html`) before store and before render; script/style/iframe/form dropped; strict whitelisted personalisation variables — unknown `{{tokens}}` are left literal, never evaluated (no template injection). ✅ Phase 3 |
 | **SQL injection** | Prisma parameterised queries throughout. ✅ |
 | **CSRF** | SameSite cookies + same-origin Server Actions; explicit origin checks on state-changing routes. ✅/⏳ |
 | **Clickjacking / sniffing** | `X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`, `Referrer-Policy`. ✅ Phase 1 |

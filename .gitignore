@@ -43,7 +43,7 @@ yarn-error.log*
 .vscode
 *.log
 
-# claude / agent tooling — never commit
-.claude/
-CLAUDE.md
+# local agent/tooling artefacts — never commit
+.agent/
+AGENT*.md
 .mcp.json

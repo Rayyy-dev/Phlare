@@ -32,6 +32,19 @@ export const loginSchema = z.object({
 export type SetupInput = z.infer<typeof setupSchema>;
 export type LoginInput = z.infer<typeof loginSchema>;
 
+// ── Enums (kept in sync with the Prisma schema) ──────────────────────────────
+export const DIFFICULTIES = ["EASY", "MEDIUM", "HARD"] as const;
+export const PSYCH_PRINCIPLES = [
+  "AUTHORITY",
+  "URGENCY",
+  "SOCIAL_PROOF",
+  "RECIPROCITY",
+  "LIKING",
+  "CURIOSITY_FEAR",
+] as const;
+export const SMTP_SECURITIES = ["NONE", "STARTTLS", "SSL"] as const;
+export const LANDING_FIELD_TYPES = ["text", "email", "password", "tel"] as const;
+
 // An optional free-text field: blank/whitespace becomes `undefined` rather than
 // an empty string, so optional columns import cleanly.
 const optionalText = (max: number) =>
@@ -65,3 +78,63 @@ export const RECIPIENT_FIELDS = [
 export type RecipientField = (typeof RECIPIENT_FIELDS)[number];
 export type RecipientInput = z.infer<typeof recipientSchema>;
 export type GroupInput = z.infer<typeof groupSchema>;
+
+// ── Email templates ──────────────────────────────────────────────────────────
+
+export const emailTemplateSchema = z.object({
+  name: z.string().trim().min(1, "Name is required.").max(160),
+  subject: z.string().trim().min(1, "Subject is required.").max(200),
+  senderName: z.string().trim().min(1, "Sender name is required.").max(120),
+  senderEmail: z.string().trim().toLowerCase().email("Enter a valid sender email."),
+  htmlBody: z.string().min(1, "The email body cannot be empty."),
+  textBody: optionalText(20000),
+  difficulty: z.enum(DIFFICULTIES),
+  principle: z.enum(PSYCH_PRINCIPLES),
+  // Warning signs present in this template; shown on the teachable-moment page.
+  redFlags: z.array(z.string().trim().min(1)).max(20).default([]),
+});
+
+// ── Landing pages ────────────────────────────────────────────────────────────
+
+export const landingFieldSchema = z.object({
+  // The form field NAME — used only to record which fields were filled, never
+  // their values. Restricted to a safe identifier.
+  name: z.string().trim().min(1).max(60).regex(/^[a-zA-Z0-9_-]+$/, "Use letters, numbers, - or _ only."),
+  label: z.string().trim().min(1).max(120),
+  type: z.enum(LANDING_FIELD_TYPES),
+});
+
+export const landingPageSchema = z.object({
+  name: z.string().trim().min(1, "Name is required.").max(160),
+  htmlBody: z.string().min(1, "The page body cannot be empty."),
+  hasForm: z.boolean().default(false),
+  fieldDefs: z.array(landingFieldSchema).max(20).default([]),
+  difficulty: z.enum(DIFFICULTIES),
+});
+
+// ── Sending profiles ─────────────────────────────────────────────────────────
+
+const baseSendingProfile = z.object({
+  name: z.string().trim().min(1, "Name is required.").max(120),
+  host: z.string().trim().min(1, "Host is required.").max(255),
+  port: z.coerce.number().int().min(1).max(65535),
+  username: optionalText(255),
+  security: z.enum(SMTP_SECURITIES),
+  fromName: z.string().trim().min(1, "From name is required.").max(120),
+  fromEmail: z.string().trim().toLowerCase().email("Enter a valid from email."),
+});
+
+// On create a password may be supplied; on edit it is only set when changed, so
+// the password is always optional and handled separately from the core fields.
+export const sendingProfileSchema = baseSendingProfile.extend({
+  password: optionalText(255),
+});
+
+export const testEmailSchema = z.object({
+  to: z.string().trim().toLowerCase().email("Enter a valid email address."),
+});
+
+export type EmailTemplateInput = z.infer<typeof emailTemplateSchema>;
+export type LandingFieldDef = z.infer<typeof landingFieldSchema>;
+export type LandingPageInput = z.infer<typeof landingPageSchema>;
+export type SendingProfileInput = z.infer<typeof sendingProfileSchema>;

@@ -29,30 +29,148 @@ async function main() {
     create: { id: "singleton" },
   });
 
-  if ((await prisma.recipient.count()) > 0) {
-    console.log("[seed] recipients already present — skipping sample data.");
-    return;
+  // Sample recipients/groups load only on a fresh database; built-in content is
+  // seeded independently (each block guards on its own table being empty).
+  if ((await prisma.recipient.count()) === 0) {
+    await prisma.recipient.createMany({ data: SAMPLE_RECIPIENTS });
+    const recipients = await prisma.recipient.findMany();
+    const byDept = (dept: string) => recipients.filter((r) => r.department === dept);
+
+    const finance = await prisma.group.create({
+      data: { name: "Finance Team", description: "Finance department staff." },
+    });
+    const itDept = await prisma.group.create({
+      data: { name: "IT Department", description: "IT and help-desk staff." },
+    });
+
+    await prisma.groupMember.createMany({
+      data: [
+        ...byDept("Finance").map((r) => ({ groupId: finance.id, recipientId: r.id })),
+        ...byDept("IT").map((r) => ({ groupId: itDept.id, recipientId: r.id })),
+      ],
+    });
+    console.log(`[seed] created ${SAMPLE_RECIPIENTS.length} sample recipients and 2 groups.`);
+  } else {
+    console.log("[seed] recipients already present — skipping sample recipients.");
   }
 
-  await prisma.recipient.createMany({ data: SAMPLE_RECIPIENTS });
-  const recipients = await prisma.recipient.findMany();
-  const byDept = (dept: string) => recipients.filter((r) => r.department === dept);
+  await seedBuiltInContent();
+}
 
-  const finance = await prisma.group.create({
-    data: { name: "Finance Team", description: "Finance department staff." },
-  });
-  const itDept = await prisma.group.create({
-    data: { name: "IT Department", description: "IT and help-desk staff." },
-  });
+/**
+ * A small starter library of GENERIC, NON-BRANDED training content (isBuiltin).
+ * These are deliberately fictional ("Acme Corp / IT Helpdesk" style) and are
+ * never imitations of real brands (Section 7.4). Each template carries a
+ * difficulty, a Cialdini principle, and the red flags shown on the
+ * teachable-moment page later.
+ */
+async function seedBuiltInContent() {
+  if ((await prisma.emailTemplate.count()) === 0) {
+    await prisma.emailTemplate.createMany({
+      data: [
+        {
+          isBuiltin: true,
+          name: "Password Expiry Notice",
+          subject: "Action required: your password expires today",
+          senderName: "IT Helpdesk",
+          senderEmail: "helpdesk@acme-corp-it.example",
+          difficulty: "EASY",
+          principle: "AUTHORITY",
+          htmlBody:
+            `<p>Dear {{firstName}},</p>` +
+            `<p>Our records show your {{company}} account password expires <strong>today</strong>. ` +
+            `To avoid being locked out, please confirm your credentials now.</p>` +
+            `<p><a href="{{trackingLink}}">Verify my account</a></p>` +
+            `<p>Regards,<br/>IT Helpdesk</p>`,
+          redFlags: [
+            "Creates urgency by claiming the password expires today",
+            "Sender domain (acme-corp-it.example) is not the real IT domain",
+            "Asks you to confirm credentials via an emailed link",
+            "Generic sign-off with no named contact",
+          ],
+        },
+        {
+          isBuiltin: true,
+          name: "Shared Document",
+          subject: "{{firstName}}, a document was shared with you",
+          senderName: "Document Share",
+          senderEmail: "no-reply@acme-docs.example",
+          difficulty: "MEDIUM",
+          principle: "CURIOSITY_FEAR",
+          htmlBody:
+            `<p>Hi {{firstName}},</p>` +
+            `<p>A colleague has shared a confidential document with you titled ` +
+            `<em>“Q3 Restructure — {{department}}”</em>.</p>` +
+            `<p><a href="{{trackingLink}}">Open document</a></p>` +
+            `<p>This link will expire in 24 hours.</p>`,
+          redFlags: [
+            "Plays on curiosity about a confidential restructure",
+            "Does not name the colleague who supposedly shared it",
+            "Artificial 24-hour expiry to rush you",
+            "Unfamiliar sharing domain",
+          ],
+        },
+        {
+          isBuiltin: true,
+          name: "Payroll Bank Details Update",
+          subject: "Payroll: confirm your bank details before cut-off",
+          senderName: "Payroll Team",
+          senderEmail: "payroll@acme-corp-hr.example",
+          difficulty: "HARD",
+          principle: "URGENCY",
+          htmlBody:
+            `<p>Dear {{firstName}},</p>` +
+            `<p>We are updating payroll records for {{company}}. To ensure your ` +
+            `next salary is paid on time, confirm your bank details before the ` +
+            `cut-off at 5pm today.</p>` +
+            `<p><a href="{{trackingLink}}">Confirm bank details</a></p>` +
+            `<p>Payroll Team</p>`,
+          redFlags: [
+            "Targets payment information with a same-day deadline",
+            "Look-alike HR domain (acme-corp-hr.example)",
+            "Requests sensitive financial details via a link",
+            "Pressure to act before a cut-off time",
+          ],
+        },
+      ],
+    });
+    console.log("[seed] created 3 built-in email templates.");
+  }
 
-  await prisma.groupMember.createMany({
-    data: [
-      ...byDept("Finance").map((r) => ({ groupId: finance.id, recipientId: r.id })),
-      ...byDept("IT").map((r) => ({ groupId: itDept.id, recipientId: r.id })),
-    ],
-  });
-
-  console.log(`[seed] created ${SAMPLE_RECIPIENTS.length} sample recipients and 2 groups.`);
+  if ((await prisma.landingPage.count()) === 0) {
+    await prisma.landingPage.createMany({
+      data: [
+        {
+          isBuiltin: true,
+          name: "Generic Webmail Login",
+          difficulty: "MEDIUM",
+          hasForm: true,
+          htmlBody:
+            `<h2>Sign in to Webmail</h2>` +
+            `<p>Please sign in to continue to your mailbox.</p>`,
+          // Field DEFINITIONS only — recipient input is never captured/stored.
+          fieldDefs: [
+            { name: "username", label: "Username", type: "text" },
+            { name: "password", label: "Password", type: "password" },
+          ],
+        },
+        {
+          isBuiltin: true,
+          name: "Document Portal Login",
+          difficulty: "MEDIUM",
+          hasForm: true,
+          htmlBody:
+            `<h2>Document Portal</h2>` +
+            `<p>Sign in with your work email to view the shared document.</p>`,
+          fieldDefs: [
+            { name: "email", label: "Work email", type: "email" },
+            { name: "password", label: "Password", type: "password" },
+          ],
+        },
+      ],
+    });
+    console.log("[seed] created 2 built-in landing pages.");
+  }
 }
 
 main()

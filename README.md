@@ -122,8 +122,13 @@ running log.
 - ✅ **Phase 1 — Foundation**: project scaffold, first-run setup wizard,
   session-based authentication (argon2id, lockout), PostgreSQL via Prisma,
   background-worker process, and the one-command Docker stack with Mailpit.
-- ⏳ Phase 2 — Recipients, groups, CSV import
-- ⏳ Phase 3 — Templates, landing pages, sending profiles
+- ✅ **Phase 2 — Recipients & groups**: recipient CRUD with soft-delete,
+  search/department/group filters, group membership, and CSV import (column
+  mapping, per-row report, email-idempotent, reactivation of soft-deleted).
+- ✅ **Phase 3 — Content & delivery**: email-template and landing-page CRUD with
+  HTML editor + live preview, server-side sanitisation, strict whitelisted
+  personalisation, SMTP sending profiles (encrypted at rest) with a Mailpit
+  test-send, and a built-in starter content library.
 - ⏳ Phase 4 — Campaign engine + tracking
 - ⏳ Phase 5 — Just-in-time learning + quiz
 - ⏳ Phase 6 — Analytics, exports, risk scoring

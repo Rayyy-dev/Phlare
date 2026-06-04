@@ -170,6 +170,37 @@ constraint still guarantees there is at most one row per email/name to reactivat
 the database alone; all create/import paths funnel through the service layer so
 the rule is applied consistently.
 
+## D11 — `sanitize-html` instead of isomorphic-dompurify
+
+**Context.** Phase 1 planned isomorphic-dompurify for HTML sanitisation. In
+Phase 3 it broke the Next.js server build: it pulls in `jsdom`, whose transitive
+`@csstools/css-calc` is ESM-only and cannot be `require()`d by Next's server
+bundle (`ERR_REQUIRE_ESM`).
+
+**Decision.** Sanitise with **`sanitize-html`** — a pure-JS, parser-based
+sanitiser with no `jsdom` dependency.
+
+**Rationale.** Same defensive purpose (drop `<script>`, event handlers,
+`javascript:` URLs, and unsafe tags), but no headless-DOM dependency, so the
+server build stays clean and the image stays lighter. Configured to allow a safe
+email/landing tag+attribute set and to preserve a `{{trackingLink}}` placeholder
+in hrefs until personalisation runs. Verified: scripts/handlers/`javascript:`
+URLs are stripped while the placeholder survives.
+
+**Trade-offs.** `sanitize-html` is parser- rather than DOM-based; its allow-list
+is configured explicitly (which is arguably clearer to audit for a thesis).
+
+## D12 — Strict whitelisted personalisation (no template engine)
+
+**Decision.** `{{variable}}` substitution is a plain replacement of a fixed
+whitelist of tokens (`firstName`, `lastName`, `email`, `department`,
+`trackingLink`, `company`). There is no expression language; unknown tokens are
+left literal.
+
+**Rationale.** A real template engine (Handlebars, EJS, etc.) on admin-authored
+content is a template-injection surface. A whitelist-only replacement makes
+injection impossible by construction and is trivial to reason about at defence.
+
 ## Phase log
 
 - **Phase 1 (foundation).** Scaffolded the app; implemented the setup wizard,
@@ -182,3 +213,11 @@ the rule is applied consistently.
   imported/updated/reactivated/skipped/failed report, and email idempotency.
   Email/name uniqueness and reactivation per D10. Every mutation audited. Added
   synthetic seed data (8 recipients, 2 groups). No schema change required.
+- **Phase 3 (content & delivery).** Email-template and landing-page CRUD with
+  HTML editor + sandboxed live preview, server-side sanitisation (D11), and
+  strict whitelisted personalisation (D12). Landing pages store field
+  definitions only (never recipient input). Sending-profile CRUD with SMTP
+  passwords encrypted at rest (AES-GCM) and a "send test email" through Mailpit
+  that records the result; plaintext passwords never returned to the client.
+  Seeded 3 built-in templates + 2 landing pages (generic, non-branded). No
+  schema change required.
