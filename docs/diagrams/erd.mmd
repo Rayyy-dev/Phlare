@@ -1,0 +1,115 @@
+%%{init: {"theme":"neutral","themeVariables":{"fontFamily":"Helvetica, Arial, sans-serif","fontSize":"13px","lineColor":"#222","primaryColor":"#f2f2f2","primaryBorderColor":"#222","primaryTextColor":"#111"}}}%%
+erDiagram
+    %% Compact, thesis-ready ERD: every entity and relationship, with only the
+    %% key attributes (PK / UK / FK + a few defining columns). The full
+    %% column-level model is in prisma/schema.prisma.
+
+    ADMIN ||--o{ SESSION : "has"
+    ADMIN ||--o{ CAMPAIGN : "creates"
+    ADMIN ||--o{ AUDIT_LOG : "acts in"
+
+    RECIPIENT ||--o{ GROUP_MEMBER : ""
+    GROUP ||--o{ GROUP_MEMBER : ""
+    RECIPIENT ||--o{ CAMPAIGN_TARGET : "targeted in"
+
+    EMAIL_TEMPLATE ||--o{ CAMPAIGN : "used by"
+    LANDING_PAGE ||--o{ CAMPAIGN : "used by"
+    SENDING_PROFILE ||--o{ CAMPAIGN : "sends via"
+    QUIZ |o--o{ CAMPAIGN : "optional"
+    EMAIL_TEMPLATE ||--o{ QUIZ : "tagged to"
+
+    CAMPAIGN ||--o{ CAMPAIGN_GROUP : ""
+    GROUP ||--o{ CAMPAIGN_GROUP : ""
+    CAMPAIGN ||--o{ CAMPAIGN_TARGET : "expands to"
+
+    CAMPAIGN_TARGET ||--o{ EVENT : "records"
+    CAMPAIGN_TARGET ||--o{ QUIZ_RESULT : "produces"
+    QUIZ ||--o{ QUIZ_RESULT : ""
+
+    ADMIN {
+        cuid id PK
+        string email UK
+        string passwordHash
+        datetime lockedUntil
+    }
+    SESSION {
+        string id PK "sha256(token)"
+        cuid adminId FK
+        datetime expiresAt
+    }
+    RECIPIENT {
+        cuid id PK
+        string email UK
+        string department
+        float riskScore
+        datetime deletedAt
+    }
+    GROUP {
+        cuid id PK
+        string name UK
+        datetime deletedAt
+    }
+    GROUP_MEMBER {
+        cuid groupId FK
+        cuid recipientId FK
+    }
+    EMAIL_TEMPLATE {
+        cuid id PK
+        string subject
+        enum difficulty
+        enum principle
+        json redFlags
+    }
+    LANDING_PAGE {
+        cuid id PK
+        bool hasForm
+        json fieldDefs "names only"
+    }
+    SENDING_PROFILE {
+        cuid id PK
+        string host
+        string passwordCiphertext "AES-GCM"
+    }
+    QUIZ {
+        cuid id PK
+        string title
+        json questions
+    }
+    CAMPAIGN {
+        cuid id PK
+        enum status
+        bool authorizationAck
+        int throttlePerMinute
+        datetime scheduledAt
+    }
+    CAMPAIGN_GROUP {
+        cuid campaignId FK
+        cuid groupId FK
+    }
+    CAMPAIGN_TARGET {
+        cuid id PK
+        string trackingToken UK
+        enum status
+        datetime firstClickedAt
+        datetime firstSubmittedAt
+    }
+    EVENT {
+        cuid id PK
+        enum type
+        datetime occurredAt
+        json metadata "field names only"
+    }
+    QUIZ_RESULT {
+        cuid id PK
+        int score
+        json answers "indices only"
+    }
+    AUDIT_LOG {
+        cuid id PK
+        string action
+        datetime createdAt
+    }
+    SETTINGS {
+        string id PK "singleton"
+        int retentionDays
+    }

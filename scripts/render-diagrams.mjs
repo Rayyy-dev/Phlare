@@ -61,11 +61,17 @@ for (const name of figures) {
   render(src, join(diagramsDir, name));
 }
 
-// 2) ERD: extract the Mermaid block from the generated markdown, then render it
-//    with the SAME theme as the other figures for a consistent look.
+// 2) ERD. Prefer the compact, hand-authored erd.mmd (thesis-ready — entities +
+//    relationships + key attributes only). Fall back to extracting the full
+//    auto-generated diagram from erd.md (every column) if the compact one is
+//    absent.
+const erdHand = join(diagramsDir, "erd.mmd");
 const erdMd = join(diagramsDir, "erd.md");
-if (existsSync(erdMd)) {
-  console.log("Rendering erd…");
+if (existsSync(erdHand)) {
+  console.log("Rendering erd (compact)…");
+  render(erdHand, join(diagramsDir, "erd"));
+} else if (existsSync(erdMd)) {
+  console.log("Rendering erd (full, generated)…");
   const md = readFileSync(erdMd, "utf8");
   const match = md.match(/```mermaid\s*([\s\S]*?)```/);
   const body = match ? match[1].trim() : md.trim();
@@ -73,7 +79,7 @@ if (existsSync(erdMd)) {
   writeFileSync(erdMmd, body, "utf8");
   render(erdMmd, join(diagramsDir, "erd"));
 } else {
-  console.warn("  ! docs/diagrams/erd.md not found — run `npx prisma generate` first.");
+  console.warn("  ! no ERD source found (erd.mmd or erd.md).");
 }
 
 console.log("\nAll diagrams rendered to docs/diagrams/.");
