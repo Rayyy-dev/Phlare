@@ -40,7 +40,10 @@ This runs `prisma generate` (which emits the ERD as Mermaid markdown) and then
 | `fig6-attack-taxonomy.png` | 6 — Taxonomy of phishing attacks | 1 | Hand-authored |
 | `fig7-cialdini-principles.png` | 7 — Cialdini's principles in phishing | 1 (§1.3) | Hand-authored |
 | `fig8-dsrm-methodology.png` | 8 — DSRM activities mapped to chapters | method. | Hand-authored |
-| `erd.png/.svg` | ERD | data model | `schema.prisma` (generated) |
+| `fig9-simplified-erd.png` | 9 — Simplified ERD (core tables) | 3 (§3.3) | Hand-authored |
+| `fig10-campaign-sequence.png` | 10 — Send → track → teach sequence | 3 | Hand-authored |
+| `fig11-security-mechanisms.png` | 11 — Security & data-protection mechanisms | impl. | Hand-authored |
+| `erd.png/.svg` | Full ERD (every column) | data model | `erd.mmd` (compact) / `schema.prisma` |
 
 > Figure 4 reflects the **actual** implemented architecture and is regenerated as
 > the system evolves. The ERD is generated from the Prisma schema, so it always
