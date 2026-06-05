@@ -19,7 +19,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
-    "demo": "tsx scripts/demo-campaign.ts"
+    "demo": "tsx scripts/demo-campaign.ts",
+    "loadtest": "tsx scripts/eval/load-test.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
@@ -39,6 +40,7 @@
     "zod": "^3.24.1"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.11.3",
     "@mermaid-js/mermaid-cli": "^11.15.0",
     "@playwright/test": "^1.49.1",
     "@types/node": "^22.10.5",

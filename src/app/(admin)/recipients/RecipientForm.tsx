@@ -80,11 +80,11 @@ export function RecipientForm({
 
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
-            <label className="label" htmlFor="department">Department <span className="text-slate-400">(optional)</span></label>
+            <label className="label" htmlFor="department">Department <span className="text-slate-500">(optional)</span></label>
             <input id="department" name="department" className="input" value={fields.department} onChange={set("department")} />
           </div>
           <div>
-            <label className="label" htmlFor="position">Position <span className="text-slate-400">(optional)</span></label>
+            <label className="label" htmlFor="position">Position <span className="text-slate-500">(optional)</span></label>
             <input id="position" name="position" className="input" value={fields.position} onChange={set("position")} />
           </div>
         </div>

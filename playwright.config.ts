@@ -9,6 +9,9 @@ import { defineConfig, devices } from "@playwright/test";
 export default defineConfig({
   testDir: "./tests/e2e",
   timeout: 60_000,
+  // Generous expect timeout so server-action redirects survive dev-mode
+  // first-compile latency.
+  expect: { timeout: 15_000 },
   fullyParallel: false,
   workers: 1,
   retries: 0,

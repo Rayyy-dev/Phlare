@@ -46,7 +46,7 @@ export default async function SendingProfilesPage() {
               {profiles.map((p) => (
                 <tr key={p.id} className="hover:bg-slate-50">
                   <td className="px-4 py-3 font-medium">{p.name}</td>
-                  <td className="px-4 py-3 text-slate-600">{p.host}:{p.port} <span className="text-slate-400">({p.security})</span></td>
+                  <td className="px-4 py-3 text-slate-600">{p.host}:{p.port} <span className="text-slate-500">({p.security})</span></td>
                   <td className="px-4 py-3 text-slate-600">{p.fromName} &lt;{p.fromEmail}&gt;</td>
                   <td className="px-4 py-3">
                     <span className={p.lastTestOk === false ? "text-red-600" : p.lastTestOk ? "text-green-700" : "text-slate-500"}>

@@ -36,7 +36,7 @@ export default async function DashboardPage() {
           <div key={s.label} className="card">
             <p className="text-sm font-medium text-slate-500">{s.label}</p>
             <p className="mt-2 text-3xl font-bold">{s.value}</p>
-            <p className="mt-1 text-xs text-slate-400">
+            <p className="mt-1 text-xs text-slate-500">
               {s.hint ? `Available in ${s.hint}` : "Active"}
             </p>
           </div>

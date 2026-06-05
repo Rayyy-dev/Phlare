@@ -137,7 +137,7 @@ export function ImportWizard({ groups }: { groups: { id: string; name: string }[
 
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
-              <label className="label" htmlFor="groupId">Add all to group <span className="text-slate-400">(optional)</span></label>
+              <label className="label" htmlFor="groupId">Add all to group <span className="text-slate-500">(optional)</span></label>
               <select id="groupId" name="groupId" className="input">
                 <option value="">— none —</option>
                 {groups.map((g) => (

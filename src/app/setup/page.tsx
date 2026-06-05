@@ -27,7 +27,7 @@ export default async function SetupPage() {
       <div className="card">
         <SetupForm />
       </div>
-      <p className="mt-6 text-center text-xs text-slate-400">
+      <p className="mt-6 text-center text-xs text-slate-500">
         Phlare — authorised internal security-awareness training only.
       </p>
     </main>

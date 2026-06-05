@@ -25,11 +25,17 @@ async function recordFirst(
   metadata?: Prisma.InputJsonValue,
   meta?: { userAgent?: string | null }
 ): Promise<void> {
+  // A paused or stopped campaign must not register new interaction events — the
+  // exercise is halted. The relation filter makes this atomic with the flip.
   const flipped = await prisma.campaignTarget.updateMany({
-    where: { trackingToken: token, [field]: null },
+    where: {
+      trackingToken: token,
+      [field]: null,
+      campaign: { status: { notIn: ["PAUSED", "STOPPED"] } },
+    },
     data: { [field]: new Date() },
   });
-  if (flipped.count !== 1) return; // unknown token, or already recorded
+  if (flipped.count !== 1) return; // unknown token, already recorded, or halted
 
   const target = await prisma.campaignTarget.findUnique({
     where: { trackingToken: token },

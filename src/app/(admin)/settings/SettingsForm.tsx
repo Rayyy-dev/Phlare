@@ -44,7 +44,7 @@ export function SettingsForm({
           <p className="mt-1 text-xs text-slate-500">Raw events older than this are deleted daily. 0 = keep indefinitely.</p>
         </div>
         <div className="sm:col-span-2">
-          <label className="label" htmlFor="reportEmail">Report inbox <span className="text-slate-400">(optional)</span></label>
+          <label className="label" htmlFor="reportEmail">Report inbox <span className="text-slate-500">(optional)</span></label>
           <input id="reportEmail" name="reportEmail" type="email" className="input" defaultValue={settings.reportEmail ?? ""} placeholder="security@acme-corp.example" />
           {fe.reportEmail && <p className="form-error">{fe.reportEmail}</p>}
         </div>

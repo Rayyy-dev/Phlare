@@ -27,8 +27,9 @@ ENV PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
 RUN apt-get update && apt-get install -y --no-install-recommends openssl ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
-# Full node_modules are kept so the worker (tsx) and Prisma CLI run in-container.
-COPY --from=deps /app/node_modules ./node_modules
+# Full node_modules from the BUILD stage so the generated Prisma client (with the
+# Linux query engine) is included, and the worker (tsx) + Prisma CLI are present.
+COPY --from=build /app/node_modules ./node_modules
 COPY --from=build /app/.next/standalone ./
 COPY --from=build /app/.next/static ./.next/static
 COPY --from=build /app/public ./public

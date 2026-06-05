@@ -38,7 +38,7 @@ export function QuizForm({
           <input id="title" name="title" className="input" defaultValue={quiz?.title} required />
         </div>
         <div>
-          <label className="label" htmlFor="templateId">Related template <span className="text-slate-400">(optional)</span></label>
+          <label className="label" htmlFor="templateId">Related template <span className="text-slate-500">(optional)</span></label>
           <select id="templateId" name="templateId" className="input" defaultValue={quiz?.templateId ?? ""}>
             <option value="">None</option>
             {templates.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}
@@ -64,7 +64,7 @@ export function QuizForm({
                   <input type="radio" name={`correct-${qi}`} checked={question.correctIndex === oi} onChange={() => patch(qi, { correctIndex: oi })} className="h-4 w-4" />
                   <input className="input" placeholder={`Option ${oi + 1}`} value={opt} onChange={(e) => patchOption(qi, oi, e.target.value)} />
                   {question.options.length > 2 && (
-                    <button type="button" className="text-sm text-slate-400 hover:text-red-600"
+                    <button type="button" className="text-sm text-slate-500 hover:text-red-600"
                       onClick={() => patch(qi, {
                         options: question.options.filter((_, j) => j !== oi),
                         // Keep correctIndex pointing at the same option after removal.

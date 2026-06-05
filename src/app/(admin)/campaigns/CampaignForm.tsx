@@ -76,7 +76,7 @@ export function CampaignForm({
             groups.map((g) => (
               <label key={g.id} className="flex items-center gap-2 text-sm text-slate-700">
                 <input type="checkbox" name="groupIds" value={g.id} className="h-4 w-4" />
-                {g.name} <span className="text-slate-400">({g.memberCount})</span>
+                {g.name} <span className="text-slate-500">({g.memberCount})</span>
               </label>
             ))
           )}
@@ -86,14 +86,14 @@ export function CampaignForm({
 
       <div className="grid gap-4 sm:grid-cols-3">
         <div>
-          <label className="label" htmlFor="quizId">Knowledge-check quiz <span className="text-slate-400">(optional)</span></label>
+          <label className="label" htmlFor="quizId">Knowledge-check quiz <span className="text-slate-500">(optional)</span></label>
           <select id="quizId" name="quizId" className="input" defaultValue="">
             <option value="">None</option>
             {quizzes.map((q) => <option key={q.id} value={q.id}>{q.name}</option>)}
           </select>
         </div>
         <div>
-          <label className="label" htmlFor="scheduledAt">Schedule <span className="text-slate-400">(blank = on launch)</span></label>
+          <label className="label" htmlFor="scheduledAt">Schedule <span className="text-slate-500">(blank = on launch)</span></label>
           <input id="scheduledAt" name="scheduledAt" type="datetime-local" className="input" />
         </div>
         <div>

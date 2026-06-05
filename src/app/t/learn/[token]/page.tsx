@@ -70,7 +70,7 @@ export default async function LearnPage({
           </p>
         )}
 
-        <p className="text-xs text-slate-400">
+        <p className="text-xs text-slate-500">
           If you receive a message like this for real, report it to your IT or
           security team.
         </p>

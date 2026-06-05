@@ -49,7 +49,7 @@ export default async function AdminLayout({
             >
               <span>{item.label}</span>
               {item.phase && (
-                <span className="rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-semibold text-slate-400">
+                <span className="rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-semibold text-slate-500">
                   P{item.phase}
                 </span>
               )}

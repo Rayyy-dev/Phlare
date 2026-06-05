@@ -93,12 +93,12 @@ export function TemplateForm({
       {fe.htmlBody && <p className="form-error">{fe.htmlBody}</p>}
 
       <div>
-        <label className="label" htmlFor="textBody">Plain-text alternative <span className="text-slate-400">(optional)</span></label>
+        <label className="label" htmlFor="textBody">Plain-text alternative <span className="text-slate-500">(optional)</span></label>
         <textarea id="textBody" name="textBody" className="input min-h-24 font-mono text-xs" defaultValue={template?.textBody ?? ""} />
       </div>
 
       <div>
-        <label className="label" htmlFor="redFlags">Red flags <span className="text-slate-400">(one per line — shown on the teachable-moment page)</span></label>
+        <label className="label" htmlFor="redFlags">Red flags <span className="text-slate-500">(one per line — shown on the teachable-moment page)</span></label>
         <textarea id="redFlags" name="redFlags" className="input min-h-28" defaultValue={(template?.redFlags ?? []).join("\n")}
           placeholder={"Mismatched sender address\nUrgent deadline pressure\nGeneric greeting"} />
       </div>
