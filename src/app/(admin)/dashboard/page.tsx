@@ -6,6 +6,7 @@ import { getOrgMetrics } from "@/server/analytics/service";
 import { listCampaigns } from "@/server/campaigns/service";
 import { listHighRisk } from "@/server/risk/service";
 import { CampaignStatusBadge } from "@/components/StatusBadge";
+import { EngagementFunnelChart } from "@/components/charts";
 
 export const dynamic = "force-dynamic";
 
@@ -13,6 +14,34 @@ function riskBadge(score: number) {
   const n = Math.round(score);
   const cls = n >= 67 ? "badge-red" : n >= 34 ? "badge-amber" : "badge-green";
   return <span className={`badge ${cls}`}>{n}</span>;
+}
+
+type RiskRow = { id: string; firstName: string; lastName: string; department: string | null; riskScore: number };
+
+function RiskPanel({ rows }: { rows: RiskRow[] }) {
+  return (
+    <div className="card p-0">
+      <div className="flex items-center justify-between border-b border-ink-200 px-5 py-3.5">
+        <h2 className="text-sm font-semibold text-ink-700">Highest-risk people</h2>
+        <Link href="/analytics" className="text-sm font-medium text-brand-600 hover:text-brand-700">Analytics</Link>
+      </div>
+      {rows.length === 0 ? (
+        <p className="px-5 py-8 text-center text-sm text-ink-500">No risk scores yet.</p>
+      ) : (
+        <ul className="divide-y divide-ink-100">
+          {rows.map((r) => (
+            <li key={r.id} className="flex items-center gap-3 px-5 py-3">
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-medium text-ink-900">{r.firstName} {r.lastName}</p>
+                <p className="truncate text-xs text-ink-500">{r.department ?? "Unassigned"}</p>
+              </div>
+              {riskBadge(r.riskScore)}
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
 }
 
 export default async function DashboardPage() {
@@ -26,6 +55,14 @@ export default async function DashboardPage() {
 
   const active = campaigns.filter((c) => c.status === "RUNNING" || c.status === "SCHEDULED").length;
   const recent = campaigns.slice(0, 5);
+  const hasActivity = metrics.delivered > 0;
+  const funnel = [
+    { stage: "Delivered", value: metrics.delivered },
+    { stage: "Opened", value: metrics.opened },
+    { stage: "Clicked", value: metrics.clicked },
+    { stage: "Submitted", value: metrics.submitted },
+    { stage: "Reported", value: metrics.reported },
+  ];
 
   const stats: { label: string; value: string | number; hint: string; Icon: LucideIcon }[] = [
     { label: "Recipients", value: recipients, hint: "in directory", Icon: Users },
@@ -76,54 +113,47 @@ export default async function DashboardPage() {
           </div>
         </div>
       ) : (
-        <div className="grid gap-6 lg:grid-cols-3">
-          {/* Recent campaigns */}
-          <div className="card p-0 lg:col-span-2">
-            <div className="flex items-center justify-between border-b border-ink-200 px-5 py-3.5">
-              <h2 className="text-sm font-semibold text-ink-700">Recent campaigns</h2>
-              <Link href="/campaigns" className="text-sm font-medium text-brand-600 hover:text-brand-700">View all</Link>
+        <>
+          {hasActivity && (
+            <div className="grid gap-6 lg:grid-cols-3">
+              <div className="card lg:col-span-2">
+                <h2 className="text-sm font-semibold text-ink-700">Engagement funnel</h2>
+                <p className="mb-3 text-xs text-ink-500">Recipients reaching each stage, across all campaigns.</p>
+                <EngagementFunnelChart data={funnel} />
+              </div>
+              <RiskPanel rows={highRisk} />
             </div>
-            <ul className="divide-y divide-ink-100">
-              {recent.map((c) => (
-                <li key={c.id}>
-                  <Link href={`/campaigns/${c.id}`} className="group flex items-center gap-4 px-5 py-3 transition hover:bg-ink-50">
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-medium text-ink-900">{c.name}</p>
-                      <p className="truncate text-xs text-ink-500">
-                        {c.emailTemplate?.name ?? "No template"} · {c._count.targets} recipient{c._count.targets === 1 ? "" : "s"}
-                      </p>
-                    </div>
-                    <CampaignStatusBadge status={c.status} />
-                    <ArrowUpRight className="h-4 w-4 shrink-0 text-ink-300 transition group-hover:text-ink-500" />
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
+          )}
 
-          {/* Highest-risk people */}
-          <div className="card p-0">
-            <div className="flex items-center justify-between border-b border-ink-200 px-5 py-3.5">
-              <h2 className="text-sm font-semibold text-ink-700">Highest-risk people</h2>
-              <Link href="/analytics" className="text-sm font-medium text-brand-600 hover:text-brand-700">Analytics</Link>
-            </div>
-            {highRisk.length === 0 ? (
-              <p className="px-5 py-8 text-center text-sm text-ink-500">No risk scores yet.</p>
-            ) : (
+          <div className={hasActivity ? "" : "grid gap-6 lg:grid-cols-3"}>
+            {/* Recent campaigns */}
+            <div className={`card p-0 ${hasActivity ? "" : "lg:col-span-2"}`}>
+              <div className="flex items-center justify-between border-b border-ink-200 px-5 py-3.5">
+                <h2 className="text-sm font-semibold text-ink-700">Recent campaigns</h2>
+                <Link href="/campaigns" className="text-sm font-medium text-brand-600 hover:text-brand-700">View all</Link>
+              </div>
               <ul className="divide-y divide-ink-100">
-                {highRisk.map((r) => (
-                  <li key={r.id} className="flex items-center gap-3 px-5 py-3">
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-medium text-ink-900">{r.firstName} {r.lastName}</p>
-                      <p className="truncate text-xs text-ink-500">{r.department ?? "Unassigned"}</p>
-                    </div>
-                    {riskBadge(r.riskScore)}
+                {recent.map((c) => (
+                  <li key={c.id}>
+                    <Link href={`/campaigns/${c.id}`} className="group flex items-center gap-4 px-5 py-3 transition hover:bg-ink-50">
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-sm font-medium text-ink-900">{c.name}</p>
+                        <p className="truncate text-xs text-ink-500">
+                          {c.emailTemplate?.name ?? "No template"} · {c._count.targets} recipient{c._count.targets === 1 ? "" : "s"}
+                        </p>
+                      </div>
+                      <CampaignStatusBadge status={c.status} />
+                      <ArrowUpRight className="h-4 w-4 shrink-0 text-ink-300 transition group-hover:text-ink-500" />
+                    </Link>
                   </li>
                 ))}
               </ul>
-            )}
+            </div>
+
+            {/* Risk panel sits beside campaigns only when there's no chart row above */}
+            {!hasActivity && <RiskPanel rows={highRisk} />}
           </div>
-        </div>
+        </>
       )}
     </div>
   );

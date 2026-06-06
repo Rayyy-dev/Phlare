@@ -1,7 +1,7 @@
 "use client";
 
 import {
-  Bar, BarChart, CartesianGrid, Cell, Legend, Line, LineChart,
+  Bar, BarChart, CartesianGrid, Cell, LabelList, Legend, Line, LineChart,
   ResponsiveContainer, Tooltip, XAxis, YAxis,
 } from "recharts";
 
@@ -48,6 +48,37 @@ export function TimeSeriesChart({
         <Line type="monotone" dataKey="clicked" stroke={SHADES[2]} strokeWidth={2} dot={false} isAnimationActive={false} />
         <Line type="monotone" dataKey="submitted" stroke={INK} strokeWidth={2} dot={false} isAnimationActive={false} />
       </LineChart>
+    </ResponsiveContainer>
+  );
+}
+
+// Semantic per-stage colours for the dashboard funnel: benign steps cool,
+// risky steps warm, "reported" green. (Dashboard only — not a print figure.)
+const STAGE_COLOR: Record<string, string> = {
+  Delivered: "#9aa1b1",
+  Opened: "#5b6fd0",
+  Clicked: "#f59e0b",
+  Submitted: "#dc2626",
+  Reported: "#10b981",
+};
+
+export function EngagementFunnelChart({
+  data,
+}: {
+  data: { stage: string; value: number }[];
+}) {
+  return (
+    <ResponsiveContainer width="100%" height={252}>
+      <BarChart data={data} layout="vertical" margin={{ top: 4, right: 40, bottom: 0, left: 8 }}>
+        <CartesianGrid strokeDasharray="3 3" stroke="#eef1f5" horizontal={false} />
+        <XAxis type="number" allowDecimals={false} tick={{ fontSize: 12, fill: INK }} />
+        <YAxis type="category" dataKey="stage" width={82} axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: INK }} />
+        <Tooltip cursor={{ fill: "#f6f7f9" }} />
+        <Bar dataKey="value" barSize={22} radius={[0, 6, 6, 0]} isAnimationActive={false}>
+          {data.map((d, i) => <Cell key={i} fill={STAGE_COLOR[d.stage] ?? INK} />)}
+          <LabelList dataKey="value" position="right" style={{ fontSize: 12, fontWeight: 600, fill: INK }} />
+        </Bar>
+      </BarChart>
     </ResponsiveContainer>
   );
 }
