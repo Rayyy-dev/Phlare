@@ -6,33 +6,97 @@
   color-scheme: light;
 }
 
-body {
-  @apply bg-slate-50 text-slate-900 antialiased;
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  body {
+    @apply bg-ink-50 text-ink-900 font-sans;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+  /* Refined, brand-tinted focus ring for keyboard users across the app. */
+  :focus-visible {
+    @apply outline-none ring-2 ring-brand-500/35 ring-offset-1 ring-offset-white;
+  }
+  ::selection {
+    @apply bg-brand-500/15;
+  }
+  h1, h2, h3 {
+    @apply tracking-tight;
+  }
 }
 
-/* Reusable, accessible form primitives used across the admin UI. */
 @layer components {
+  /* ── Forms ─────────────────────────────────────────────────────────────── */
   .label {
-    @apply block text-sm font-medium text-slate-700 mb-1;
+    @apply mb-1.5 block text-[0.8125rem] font-medium text-ink-700;
   }
   .input {
-    @apply w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm
-           focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/30;
+    @apply w-full rounded-lg border border-ink-300 bg-white px-3 py-2 text-sm text-ink-900
+           shadow-[0_1px_1px_0_rgb(24_27_33/0.03)] transition
+           placeholder:text-ink-400
+           focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20
+           disabled:cursor-not-allowed disabled:bg-ink-50;
   }
-  .btn-primary {
-    @apply inline-flex items-center justify-center rounded-md bg-brand-600 px-4 py-2
-           text-sm font-semibold text-white shadow-sm transition hover:bg-brand-700
-           focus:outline-none focus:ring-2 focus:ring-brand-500/40 disabled:opacity-60;
-  }
-  .btn-secondary {
-    @apply inline-flex items-center justify-center rounded-md border border-slate-300
-           bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition
-           hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-brand-500/30;
-  }
-  .card {
-    @apply rounded-xl border border-slate-200 bg-white p-6 shadow-sm;
+  select.input {
+    @apply cursor-pointer pr-9;
   }
   .form-error {
-    @apply mt-1 text-sm text-red-600;
+    @apply mt-1.5 text-[0.8125rem] text-red-600;
   }
+
+  /* ── Buttons ───────────────────────────────────────────────────────────── */
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg bg-brand-600 px-4 py-2
+           text-sm font-medium text-white shadow-[0_1px_2px_0_rgb(24_27_33/0.12)] transition
+           hover:bg-brand-700 active:bg-brand-800
+           focus-visible:ring-2 focus-visible:ring-brand-500/40
+           disabled:cursor-not-allowed disabled:opacity-55;
+  }
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg border border-ink-300
+           bg-white px-4 py-2 text-sm font-medium text-ink-700 shadow-[0_1px_1px_0_rgb(24_27_33/0.04)]
+           transition hover:border-ink-400 hover:bg-ink-50 active:bg-ink-100
+           disabled:cursor-not-allowed disabled:opacity-55;
+  }
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm
+           font-medium text-ink-600 transition hover:bg-ink-100 hover:text-ink-900;
+  }
+
+  /* ── Surfaces ──────────────────────────────────────────────────────────── */
+  .card {
+    @apply rounded-xl border border-ink-200 bg-white p-6 shadow-card;
+  }
+
+  /* ── Badges ────────────────────────────────────────────────────────────── */
+  .badge {
+    @apply inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-xs font-medium
+           ring-1 ring-inset;
+  }
+  .badge-neutral { @apply bg-ink-100 text-ink-600 ring-ink-200; }
+  .badge-brand   { @apply bg-brand-50 text-brand-700 ring-brand-100; }
+  .badge-green   { @apply bg-emerald-50 text-emerald-700 ring-emerald-100; }
+  .badge-amber   { @apply bg-amber-50 text-amber-700 ring-amber-100; }
+  .badge-red     { @apply bg-red-50 text-red-700 ring-red-100; }
 }
+
+/* Hide the scrollbar while keeping wheel/touch scrolling. */
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Subtle, unobtrusive scrollbars (WebKit). */
+::-webkit-scrollbar { width: 11px; height: 11px; }
+::-webkit-scrollbar-thumb {
+  background-color: rgb(199 204 214 / 0.8);
+  border: 3px solid transparent;
+  border-radius: 9999px;
+  background-clip: content-box;
+}
+::-webkit-scrollbar-thumb:hover { background-color: rgb(154 161 177 / 0.9); }
