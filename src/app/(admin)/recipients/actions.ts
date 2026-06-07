@@ -18,6 +18,8 @@ export interface RecipientFormState {
   fieldErrors?: Record<string, string>;
   /** Set when the email matches a soft-deleted recipient who can be reactivated. */
   reactivateId?: string;
+  /** Set on a successful create/reactivate so the modal can close itself. */
+  ok?: boolean;
 }
 
 function readForm(formData: FormData) {
@@ -68,7 +70,7 @@ export async function createRecipientAction(
   }
 
   revalidatePath("/recipients");
-  redirect("/recipients");
+  return { ok: true };
 }
 
 export async function reactivateRecipientAction(
@@ -83,7 +85,7 @@ export async function reactivateRecipientAction(
 
   await reactivateRecipient(id, parsed.data, admin.id);
   revalidatePath("/recipients");
-  redirect("/recipients");
+  return { ok: true };
 }
 
 export async function updateRecipientAction(

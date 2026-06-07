@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Users } from "lucide-react";
 import { requireAdmin } from "@/server/auth/guard";
 import {
   listRecipients,
@@ -7,6 +8,9 @@ import {
 } from "@/server/recipients/service";
 import { listGroups } from "@/server/groups/service";
 import { ConfirmSubmit } from "@/components/ConfirmSubmit";
+import { PageHeader } from "@/components/PageHeader";
+import { EmptyState } from "@/components/EmptyState";
+import { AddRecipientButton } from "./AddRecipientButton";
 import { deleteRecipientAction } from "./actions";
 
 export const dynamic = "force-dynamic";
@@ -33,6 +37,7 @@ export default async function RecipientsPage({
 
   const from = result.total === 0 ? 0 : (result.page - 1) * RECIPIENTS_PAGE_SIZE + 1;
   const to = Math.min(result.page * RECIPIENTS_PAGE_SIZE, result.total);
+  const filtered = Boolean(sp.q || sp.department || sp.group);
 
   // Preserve active filters when building pagination links.
   const pageHref = (p: number) => {
@@ -46,16 +51,10 @@ export default async function RecipientsPage({
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Recipients</h1>
-          <p className="mt-1 text-sm text-slate-600">{result.total} active recipient{result.total === 1 ? "" : "s"}.</p>
-        </div>
-        <div className="flex gap-2">
-          <Link href="/recipients/import" className="btn-secondary">Import CSV</Link>
-          <Link href="/recipients/new" className="btn-primary">Add recipient</Link>
-        </div>
-      </div>
+      <PageHeader title="Recipients" description={`${result.total} active recipient${result.total === 1 ? "" : "s"}.`}>
+        <Link href="/recipients/import" className="btn-secondary">Import CSV</Link>
+        <AddRecipientButton />
+      </PageHeader>
 
       <form method="get" className="card flex flex-wrap items-end gap-3">
         <div className="grow">
@@ -81,41 +80,43 @@ export default async function RecipientsPage({
           </select>
         </div>
         <button type="submit" className="btn-secondary">Apply</button>
-        {(sp.q || sp.department || sp.group) && (
-          <Link href="/recipients" className="text-sm text-slate-500 hover:text-slate-700">Clear</Link>
+        {filtered && (
+          <Link href="/recipients" className="btn-ghost">Clear</Link>
         )}
       </form>
 
       <div className="card overflow-hidden p-0">
         {result.items.length === 0 ? (
-          <p className="p-8 text-center text-sm text-slate-500">
-            No recipients found. Add one or import a CSV to get started.
-          </p>
+          <EmptyState
+            icon={Users}
+            title={filtered ? "No matching recipients" : "No recipients yet"}
+            description={filtered ? "Try adjusting or clearing your filters." : "Add people individually or import a CSV to get started."}
+          />
         ) : (
-          <table className="w-full text-sm">
-            <thead className="border-b border-slate-200 bg-slate-50 text-left text-xs uppercase tracking-wide text-slate-500">
+          <table className="data-table">
+            <thead>
               <tr>
-                <th className="px-4 py-3">Name</th>
-                <th className="px-4 py-3">Email</th>
-                <th className="px-4 py-3">Department</th>
-                <th className="px-4 py-3">Position</th>
-                <th className="px-4 py-3">Groups</th>
-                <th className="px-4 py-3 text-right">Actions</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Department</th>
+                <th>Position</th>
+                <th>Groups</th>
+                <th className="text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody>
               {result.items.map((r) => (
-                <tr key={r.id} className="hover:bg-slate-50">
-                  <td className="px-4 py-3 font-medium">{r.firstName} {r.lastName}</td>
-                  <td className="px-4 py-3 text-slate-600">{r.email}</td>
-                  <td className="px-4 py-3 text-slate-600">{r.department ?? "—"}</td>
-                  <td className="px-4 py-3 text-slate-600">{r.position ?? "—"}</td>
-                  <td className="px-4 py-3 text-slate-600">
+                <tr key={r.id}>
+                  <td className="cell-strong">{r.firstName} {r.lastName}</td>
+                  <td>{r.email}</td>
+                  <td>{r.department ?? "—"}</td>
+                  <td>{r.position ?? "—"}</td>
+                  <td>
                     {r.memberships.length === 0
                       ? "—"
                       : r.memberships.map((m) => m.group.name).join(", ")}
                   </td>
-                  <td className="px-4 py-3">
+                  <td>
                     <div className="flex items-center justify-end gap-4">
                       <Link href={`/recipients/${r.id}/edit`} className="text-sm font-medium text-brand-600 hover:text-brand-700">Edit</Link>
                       <form action={deleteRecipientAction}>
@@ -134,11 +135,11 @@ export default async function RecipientsPage({
       </div>
 
       {result.pageCount > 1 && (
-        <div className="flex items-center justify-between text-sm text-slate-600">
+        <div className="flex items-center justify-between text-sm text-ink-500">
           <span>Showing {from}–{to} of {result.total}</span>
-          <div className="flex gap-2">
+          <div className="flex items-center gap-2">
             {result.page > 1 && <Link href={pageHref(result.page - 1)} className="btn-secondary">Previous</Link>}
-            <span className="px-2 py-2">Page {result.page} of {result.pageCount}</span>
+            <span className="px-2">Page {result.page} of {result.pageCount}</span>
             {result.page < result.pageCount && <Link href={pageHref(result.page + 1)} className="btn-secondary">Next</Link>}
           </div>
         </div>

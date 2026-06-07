@@ -70,6 +70,24 @@
     @apply rounded-xl border border-ink-200 bg-white p-6 shadow-card;
   }
 
+  /* ── Data tables ───────────────────────────────────────────────────────── */
+  .data-table {
+    @apply w-full text-sm;
+  }
+  .data-table th {
+    @apply border-b border-ink-200 bg-ink-50 px-4 py-3 text-left text-xs font-medium uppercase tracking-wide text-ink-500;
+  }
+  .data-table td {
+    @apply px-4 py-3 align-middle text-ink-600;
+  }
+  .data-table tbody tr {
+    @apply border-b border-ink-100 transition last:border-0 hover:bg-ink-50;
+  }
+  /* Emphasised first/identity cell in a row. */
+  .data-table td.cell-strong {
+    @apply font-medium text-ink-900;
+  }
+
   /* ── Badges ────────────────────────────────────────────────────────────── */
   .badge {
     @apply inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-xs font-medium

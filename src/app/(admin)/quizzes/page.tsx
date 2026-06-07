@@ -1,7 +1,10 @@
 import Link from "next/link";
+import { ListChecks, Plus } from "lucide-react";
 import { requireAdmin } from "@/server/auth/guard";
 import { listQuizzes } from "@/server/quizzes/service";
 import { ConfirmSubmit } from "@/components/ConfirmSubmit";
+import { PageHeader } from "@/components/PageHeader";
+import { EmptyState } from "@/components/EmptyState";
 import { deleteQuizAction } from "./actions";
 
 export const dynamic = "force-dynamic";
@@ -12,36 +15,38 @@ export default async function QuizzesPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Quizzes</h1>
-          <p className="mt-1 text-sm text-slate-600">Knowledge checks you can attach to a campaign.</p>
-        </div>
-        <Link href="/quizzes/new" className="btn-primary">New quiz</Link>
-      </div>
+      <PageHeader title="Quizzes" description="Knowledge checks you can attach to a campaign.">
+        <Link href="/quizzes/new" className="btn-primary"><Plus className="h-4 w-4" /> New quiz</Link>
+      </PageHeader>
 
-      <div className="card p-0">
+      <div className="card overflow-hidden p-0">
         {quizzes.length === 0 ? (
-          <p className="p-8 text-center text-sm text-slate-500">No quizzes yet.</p>
+          <EmptyState
+            icon={ListChecks}
+            title="No quizzes yet"
+            description="Create a short quiz to reinforce learning after a simulation."
+          >
+            <Link href="/quizzes/new" className="btn-primary"><Plus className="h-4 w-4" /> New quiz</Link>
+          </EmptyState>
         ) : (
-          <table className="w-full text-sm">
-            <thead className="border-b border-slate-200 bg-slate-50 text-left text-xs uppercase tracking-wide text-slate-500">
+          <table className="data-table">
+            <thead>
               <tr>
-                <th className="px-4 py-3">Title</th>
-                <th className="px-4 py-3">Questions</th>
-                <th className="px-4 py-3">Related template</th>
-                <th className="px-4 py-3 text-right">Completions</th>
-                <th className="px-4 py-3 text-right">Actions</th>
+                <th>Title</th>
+                <th>Questions</th>
+                <th>Related template</th>
+                <th className="text-right">Completions</th>
+                <th className="text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody>
               {quizzes.map((q) => (
-                <tr key={q.id} className="hover:bg-slate-50">
-                  <td className="px-4 py-3 font-medium">{q.title}</td>
-                  <td className="px-4 py-3 text-slate-600">{(q.questions as unknown[]).length}</td>
-                  <td className="px-4 py-3 text-slate-600">{q.template?.name ?? "—"}</td>
-                  <td className="px-4 py-3 text-right text-slate-600">{q._count.results}</td>
-                  <td className="px-4 py-3">
+                <tr key={q.id}>
+                  <td className="cell-strong">{q.title}</td>
+                  <td>{(q.questions as unknown[]).length}</td>
+                  <td>{q.template?.name ?? "—"}</td>
+                  <td className="text-right">{q._count.results}</td>
+                  <td>
                     <div className="flex items-center justify-end gap-4">
                       <Link href={`/quizzes/${q.id}/edit`} className="text-sm font-medium text-brand-600 hover:text-brand-700">Edit</Link>
                       <form action={deleteQuizAction}>

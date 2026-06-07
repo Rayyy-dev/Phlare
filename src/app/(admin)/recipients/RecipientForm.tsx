@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useEffect, useState } from "react";
 import {
   createRecipientAction,
   updateRecipientAction,
@@ -22,9 +22,15 @@ const empty: RecipientFormState = {};
 export function RecipientForm({
   mode,
   recipient,
+  onSuccess,
+  onCancel,
 }: {
   mode: "create" | "edit";
   recipient?: RecipientDefaults;
+  /** Called after a successful create/reactivate (used to close the modal). */
+  onSuccess?: () => void;
+  /** When provided, Cancel calls this instead of navigating to the list. */
+  onCancel?: () => void;
 }) {
   const primaryAction =
     mode === "edit" ? updateRecipientAction : createRecipientAction;
@@ -33,6 +39,11 @@ export function RecipientForm({
     reactivateRecipientAction,
     empty
   );
+
+  // Close the modal once the server confirms the create/reactivate succeeded.
+  useEffect(() => {
+    if (state.ok || reactState.ok) onSuccess?.();
+  }, [state.ok, reactState.ok, onSuccess]);
 
   // Controlled so the reactivation form can resubmit the same values the admin
   // already typed without re-entering them.
@@ -80,11 +91,11 @@ export function RecipientForm({
 
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
-            <label className="label" htmlFor="department">Department <span className="text-slate-500">(optional)</span></label>
+            <label className="label" htmlFor="department">Department <span className="text-ink-400">(optional)</span></label>
             <input id="department" name="department" className="input" value={fields.department} onChange={set("department")} />
           </div>
           <div>
-            <label className="label" htmlFor="position">Position <span className="text-slate-500">(optional)</span></label>
+            <label className="label" htmlFor="position">Position <span className="text-ink-400">(optional)</span></label>
             <input id="position" name="position" className="input" value={fields.position} onChange={set("position")} />
           </div>
         </div>
@@ -93,7 +104,11 @@ export function RecipientForm({
           <button type="submit" className="btn-primary" disabled={pending}>
             {pending ? "Saving…" : mode === "edit" ? "Save changes" : "Add recipient"}
           </button>
-          <a href="/recipients" className="btn-secondary">Cancel</a>
+          {onCancel ? (
+            <button type="button" className="btn-secondary" onClick={onCancel}>Cancel</button>
+          ) : (
+            <a href="/recipients" className="btn-secondary">Cancel</a>
+          )}
         </div>
       </form>
 

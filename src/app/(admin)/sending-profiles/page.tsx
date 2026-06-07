@@ -1,14 +1,19 @@
 import Link from "next/link";
+import { Send, Plus } from "lucide-react";
 import { requireAdmin } from "@/server/auth/guard";
 import { listProfiles } from "@/server/sending-profiles/service";
 import { ConfirmSubmit } from "@/components/ConfirmSubmit";
+import { PageHeader } from "@/components/PageHeader";
+import { EmptyState } from "@/components/EmptyState";
 import { deleteProfileAction } from "./actions";
 
 export const dynamic = "force-dynamic";
 
-function testLabel(at: Date | null, ok: boolean | null) {
-  if (!at) return "Never tested";
-  return ok ? "Passed" : "Failed";
+function TestBadge({ at, ok }: { at: Date | null; ok: boolean | null }) {
+  if (!at) return <span className="badge badge-neutral">Never tested</span>;
+  return ok
+    ? <span className="badge badge-green">Passed</span>
+    : <span className="badge badge-red">Failed</span>;
 }
 
 export default async function SendingProfilesPage() {
@@ -17,43 +22,43 @@ export default async function SendingProfilesPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Sending profiles</h1>
-          <p className="mt-1 text-sm text-slate-600">{profiles.length} SMTP profile{profiles.length === 1 ? "" : "s"}. Passwords are encrypted at rest.</p>
-        </div>
-        <Link href="/sending-profiles/new" className="btn-primary">New profile</Link>
-      </div>
+      <PageHeader title="Sending profiles" description={`${profiles.length} SMTP profile${profiles.length === 1 ? "" : "s"}. Passwords are encrypted at rest.`}>
+        <Link href="/sending-profiles/new" className="btn-primary"><Plus className="h-4 w-4" /> New profile</Link>
+      </PageHeader>
 
-      <div className="card p-0">
+      <div className="card overflow-hidden p-0">
         {profiles.length === 0 ? (
-          <p className="p-8 text-center text-sm text-slate-500">
-            No sending profiles yet. Add one — for the demo, point it at the local
-            Mailpit catcher (host <code>localhost</code>, port <code>1025</code>, security <code>NONE</code>).
-          </p>
+          <EmptyState
+            icon={Send}
+            title="No sending profiles yet"
+            description={
+              <>
+                Add one — for the demo, point it at the local Mailpit catcher
+                (host <code>localhost</code>, port <code>1025</code>, security <code>NONE</code>).
+              </>
+            }
+          >
+            <Link href="/sending-profiles/new" className="btn-primary"><Plus className="h-4 w-4" /> New profile</Link>
+          </EmptyState>
         ) : (
-          <table className="w-full text-sm">
-            <thead className="border-b border-slate-200 bg-slate-50 text-left text-xs uppercase tracking-wide text-slate-500">
+          <table className="data-table">
+            <thead>
               <tr>
-                <th className="px-4 py-3">Name</th>
-                <th className="px-4 py-3">Host</th>
-                <th className="px-4 py-3">From</th>
-                <th className="px-4 py-3">Last test</th>
-                <th className="px-4 py-3 text-right">Actions</th>
+                <th>Name</th>
+                <th>Host</th>
+                <th>From</th>
+                <th>Last test</th>
+                <th className="text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody>
               {profiles.map((p) => (
-                <tr key={p.id} className="hover:bg-slate-50">
-                  <td className="px-4 py-3 font-medium">{p.name}</td>
-                  <td className="px-4 py-3 text-slate-600">{p.host}:{p.port} <span className="text-slate-500">({p.security})</span></td>
-                  <td className="px-4 py-3 text-slate-600">{p.fromName} &lt;{p.fromEmail}&gt;</td>
-                  <td className="px-4 py-3">
-                    <span className={p.lastTestOk === false ? "text-red-600" : p.lastTestOk ? "text-green-700" : "text-slate-500"}>
-                      {testLabel(p.lastTestedAt, p.lastTestOk)}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3">
+                <tr key={p.id}>
+                  <td className="cell-strong">{p.name}</td>
+                  <td>{p.host}:{p.port} <span className="text-ink-400">({p.security})</span></td>
+                  <td>{p.fromName} &lt;{p.fromEmail}&gt;</td>
+                  <td><TestBadge at={p.lastTestedAt} ok={p.lastTestOk} /></td>
+                  <td>
                     <div className="flex items-center justify-end gap-4">
                       <Link href={`/sending-profiles/${p.id}/edit`} className="text-sm font-medium text-brand-600 hover:text-brand-700">Edit</Link>
                       <form action={deleteProfileAction}>

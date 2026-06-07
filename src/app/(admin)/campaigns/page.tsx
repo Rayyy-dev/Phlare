@@ -1,17 +1,12 @@
 import Link from "next/link";
+import { Megaphone, Plus } from "lucide-react";
 import { requireAdmin } from "@/server/auth/guard";
 import { listCampaigns } from "@/server/campaigns/service";
+import { PageHeader } from "@/components/PageHeader";
+import { EmptyState } from "@/components/EmptyState";
+import { CampaignStatusBadge } from "@/components/StatusBadge";
 
 export const dynamic = "force-dynamic";
-
-const STATUS_STYLES: Record<string, string> = {
-  DRAFT: "bg-slate-100 text-slate-600",
-  SCHEDULED: "bg-blue-100 text-blue-700",
-  RUNNING: "bg-green-100 text-green-700",
-  PAUSED: "bg-amber-100 text-amber-700",
-  COMPLETED: "bg-slate-200 text-slate-700",
-  STOPPED: "bg-red-100 text-red-700",
-};
 
 export default async function CampaignsPage() {
   await requireAdmin();
@@ -19,40 +14,40 @@ export default async function CampaignsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Campaigns</h1>
-          <p className="mt-1 text-sm text-slate-600">{campaigns.length} campaign{campaigns.length === 1 ? "" : "s"}.</p>
-        </div>
-        <Link href="/campaigns/new" className="btn-primary">New campaign</Link>
-      </div>
+      <PageHeader title="Campaigns" description={`${campaigns.length} campaign${campaigns.length === 1 ? "" : "s"}.`}>
+        <Link href="/campaigns/new" className="btn-primary"><Plus className="h-4 w-4" /> New campaign</Link>
+      </PageHeader>
 
-      <div className="card p-0">
+      <div className="card overflow-hidden p-0">
         {campaigns.length === 0 ? (
-          <p className="p-8 text-center text-sm text-slate-500">No campaigns yet.</p>
+          <EmptyState
+            icon={Megaphone}
+            title="No campaigns yet"
+            description="Create a campaign to send a simulation to your recipients."
+          >
+            <Link href="/campaigns/new" className="btn-primary"><Plus className="h-4 w-4" /> New campaign</Link>
+          </EmptyState>
         ) : (
-          <table className="w-full text-sm">
-            <thead className="border-b border-slate-200 bg-slate-50 text-left text-xs uppercase tracking-wide text-slate-500">
+          <table className="data-table">
+            <thead>
               <tr>
-                <th className="px-4 py-3">Name</th>
-                <th className="px-4 py-3">Status</th>
-                <th className="px-4 py-3">Template</th>
-                <th className="px-4 py-3 text-right">Targets</th>
-                <th className="px-4 py-3 text-right">Open</th>
+                <th>Name</th>
+                <th>Status</th>
+                <th>Template</th>
+                <th className="text-right">Targets</th>
+                <th className="text-right">View</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody>
               {campaigns.map((c) => (
-                <tr key={c.id} className="hover:bg-slate-50">
-                  <td className="px-4 py-3 font-medium">
+                <tr key={c.id}>
+                  <td className="cell-strong">
                     <Link href={`/campaigns/${c.id}`} className="text-brand-600 hover:text-brand-700">{c.name}</Link>
                   </td>
-                  <td className="px-4 py-3">
-                    <span className={`rounded px-2 py-0.5 text-xs font-semibold ${STATUS_STYLES[c.status]}`}>{c.status}</span>
-                  </td>
-                  <td className="px-4 py-3 text-slate-600">{c.emailTemplate.name}</td>
-                  <td className="px-4 py-3 text-right text-slate-600">{c._count.targets}</td>
-                  <td className="px-4 py-3 text-right">
+                  <td><CampaignStatusBadge status={c.status} /></td>
+                  <td>{c.emailTemplate.name}</td>
+                  <td className="text-right">{c._count.targets}</td>
+                  <td className="text-right">
                     <Link href={`/campaigns/${c.id}`} className="text-sm font-medium text-brand-600 hover:text-brand-700">View</Link>
                   </td>
                 </tr>
