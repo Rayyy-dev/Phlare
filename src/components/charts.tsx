@@ -9,6 +9,17 @@ import {
 const INK = "#1f2937";
 const SHADES = ["#94a3b8", "#64748b", "#475569", "#334155"];
 
+// Semantic colours for the on-screen (non-print) analytics charts: benign
+// engagement cool, risky actions warm, reporting green.
+const RATE_COLOR: Record<string, string> = {
+  Open: "#4f63c4",
+  Click: "#f59e0b",
+  Submit: "#ef4444",
+  Report: "#10b981",
+  "Phish-prone": "#be123c",
+};
+const severityColor = (v: number) => (v >= 67 ? "#dc2626" : v >= 34 ? "#f59e0b" : "#10b981");
+
 export function RatesBarChart({
   data,
 }: {
@@ -61,6 +72,51 @@ const STAGE_COLOR: Record<string, string> = {
   Submitted: "#dc2626",
   Reported: "#10b981",
 };
+
+// Colour variant of the rates chart for the analytics screen (each bar carries
+// a semantic colour + a % label). The greyscale RatesBarChart stays for print.
+export function EngagementRatesChart({
+  data,
+}: {
+  data: { name: string; value: number }[];
+}) {
+  return (
+    <ResponsiveContainer width="100%" height={248}>
+      <BarChart data={data} margin={{ top: 18, right: 8, bottom: 8, left: -16 }}>
+        <CartesianGrid strokeDasharray="3 3" stroke="#eef1f5" vertical={false} />
+        <XAxis dataKey="name" tick={{ fontSize: 12, fill: INK }} axisLine={{ stroke: "#e5e8ee" }} tickLine={false} />
+        <YAxis tick={{ fontSize: 12, fill: INK }} unit="%" domain={[0, 100]} axisLine={false} tickLine={false} />
+        <Tooltip formatter={(v: number) => `${v}%`} cursor={{ fill: "#f6f7f9" }} />
+        <Bar dataKey="value" radius={[6, 6, 0, 0]} maxBarSize={56} isAnimationActive={false}>
+          {data.map((d, i) => <Cell key={i} fill={RATE_COLOR[d.name] ?? INK} />)}
+          <LabelList dataKey="value" position="top" formatter={(v: number) => `${v}%`} style={{ fontSize: 11, fontWeight: 600, fill: INK }} />
+        </Bar>
+      </BarChart>
+    </ResponsiveContainer>
+  );
+}
+
+// Colour variant of the department chart: bars shaded green/amber/red by risk.
+export function DepartmentRiskChart({
+  data,
+}: {
+  data: { department: string; phishProne: number }[];
+}) {
+  return (
+    <ResponsiveContainer width="100%" height={Math.max(160, data.length * 44)}>
+      <BarChart data={data} layout="vertical" margin={{ top: 4, right: 40, bottom: 4, left: 24 }}>
+        <CartesianGrid strokeDasharray="3 3" stroke="#eef1f5" horizontal={false} />
+        <XAxis type="number" domain={[0, 100]} unit="%" tick={{ fontSize: 12, fill: INK }} axisLine={false} tickLine={false} />
+        <YAxis type="category" dataKey="department" width={120} axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: INK }} />
+        <Tooltip formatter={(v: number) => `${v}%`} cursor={{ fill: "#f6f7f9" }} />
+        <Bar dataKey="phishProne" radius={[0, 6, 6, 0]} barSize={20} isAnimationActive={false}>
+          {data.map((d, i) => <Cell key={i} fill={severityColor(d.phishProne)} />)}
+          <LabelList dataKey="phishProne" position="right" formatter={(v: number) => `${v}%`} style={{ fontSize: 11, fontWeight: 600, fill: INK }} />
+        </Bar>
+      </BarChart>
+    </ResponsiveContainer>
+  );
+}
 
 export function EngagementFunnelChart({
   data,

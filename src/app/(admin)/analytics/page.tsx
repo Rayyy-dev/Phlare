@@ -1,18 +1,22 @@
 import Link from "next/link";
+import { RotateCw } from "lucide-react";
 import { requireAdmin } from "@/server/auth/guard";
 import {
   getOrgMetrics, getDepartmentBreakdown, getRepeatClickers,
 } from "@/server/analytics/service";
 import { listHighRisk } from "@/server/risk/service";
 import { listCampaigns } from "@/server/campaigns/service";
-import { RatesBarChart, DepartmentBarChart } from "@/components/charts";
+import { EngagementRatesChart, DepartmentRiskChart } from "@/components/charts";
+import { CampaignStatusBadge } from "@/components/StatusBadge";
+import { PageHeader } from "@/components/PageHeader";
 import { recomputeRiskAction } from "./actions";
 
 export const dynamic = "force-dynamic";
 
 function riskBadge(score: number) {
-  const tone = score >= 67 ? "bg-red-100 text-red-700" : score >= 34 ? "bg-amber-100 text-amber-700" : "bg-green-100 text-green-700";
-  return <span className={`rounded px-2 py-0.5 text-xs font-semibold ${tone}`}>{score}</span>;
+  const n = Math.round(score);
+  const cls = n >= 67 ? "badge-red" : n >= 34 ? "badge-amber" : "badge-green";
+  return <span className={`badge ${cls}`}>{n}</span>;
 }
 
 export default async function AnalyticsPage() {
@@ -29,54 +33,63 @@ export default async function AnalyticsPage() {
     { name: "Phish-prone", value: metrics.phishProne },
   ];
 
+  const kpis = [
+    { label: "Delivered", value: metrics.delivered },
+    { label: "Open rate", value: `${metrics.openRate}%` },
+    { label: "Click rate", value: `${metrics.clickRate}%` },
+    { label: "Submit rate", value: `${metrics.submissionRate}%` },
+    { label: "Report rate", value: `${metrics.reportRate}%` },
+    { label: "Phish-prone", value: `${metrics.phishProne}%` },
+  ];
+
   return (
-    <div className="space-y-8">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Analytics</h1>
-          <p className="mt-1 text-sm text-slate-600">Organisation-wide results across {campaigns} campaign{campaigns === 1 ? "" : "s"}.</p>
+    <div className="space-y-6">
+      <PageHeader title="Analytics" description={`Organisation-wide results across ${campaigns} campaign${campaigns === 1 ? "" : "s"}.`}>
+        <form action={recomputeRiskAction}>
+          <button className="btn-secondary" type="submit"><RotateCw className="h-4 w-4" /> Recompute risk</button>
+        </form>
+      </PageHeader>
+
+      {/* Charts — analytics leads with the visual analysis */}
+      <div className="grid gap-6 lg:grid-cols-2">
+        <div className="card">
+          <h2 className="text-sm font-semibold text-ink-700">Engagement rates</h2>
+          <p className="mb-3 text-xs text-ink-500">Share of delivered recipients at each stage.</p>
+          <EngagementRatesChart data={rateData} />
         </div>
-        <form action={recomputeRiskAction}><button className="btn-secondary" type="submit">Recompute risk</button></form>
+        <div className="card">
+          <h2 className="text-sm font-semibold text-ink-700">Phish-prone % by department</h2>
+          <p className="mb-3 text-xs text-ink-500">Shaded green / amber / red by risk.</p>
+          {departments.length ? <DepartmentRiskChart data={departments} /> : <p className="py-8 text-center text-sm text-ink-500">No data yet.</p>}
+        </div>
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-6">
-        {[
-          { label: "Delivered", value: metrics.delivered },
-          { label: "Open rate", value: `${metrics.openRate}%` },
-          { label: "Click rate", value: `${metrics.clickRate}%` },
-          { label: "Submit rate", value: `${metrics.submissionRate}%` },
-          { label: "Report rate", value: `${metrics.reportRate}%` },
-          { label: "Phish-prone", value: `${metrics.phishProne}%` },
-        ].map((m) => (
-          <div key={m.label} className="card text-center">
-            <p className="text-2xl font-bold">{m.value}</p>
-            <p className="text-xs text-slate-500">{m.label}</p>
+      {/* KPI strip — the numbers behind the charts */}
+      <div className="grid gap-4 sm:grid-cols-3 lg:grid-cols-6">
+        {kpis.map((m) => (
+          <div key={m.label} className="card">
+            <p className="text-2xl font-semibold tracking-tight text-ink-900">{m.value}</p>
+            <p className="mt-1 text-xs text-ink-500">{m.label}</p>
           </div>
         ))}
       </div>
 
+      {/* Risk tables */}
       <div className="grid gap-6 lg:grid-cols-2">
-        <div className="card">
-          <h2 className="mb-3 text-sm font-semibold text-slate-600">Engagement rates</h2>
-          <RatesBarChart data={rateData} />
-        </div>
-        <div className="card">
-          <h2 className="mb-3 text-sm font-semibold text-slate-600">Phish-prone % by department</h2>
-          {departments.length ? <DepartmentBarChart data={departments} /> : <p className="text-sm text-slate-500">No data yet.</p>}
-        </div>
-      </div>
-
-      <div className="grid gap-6 lg:grid-cols-2">
-        <div className="card p-0">
-          <h2 className="border-b border-slate-200 px-4 py-3 text-sm font-semibold text-slate-600">Highest-risk individuals</h2>
-          {highRisk.length === 0 ? <p className="p-6 text-sm text-slate-500">No risk scores yet.</p> : (
-            <table className="w-full text-sm">
-              <tbody className="divide-y divide-slate-100">
+        <div className="card overflow-hidden p-0">
+          <div className="border-b border-ink-200 px-5 py-3.5">
+            <h2 className="text-sm font-semibold text-ink-700">Highest-risk individuals</h2>
+          </div>
+          {highRisk.length === 0 ? (
+            <p className="px-5 py-8 text-center text-sm text-ink-500">No risk scores yet.</p>
+          ) : (
+            <table className="data-table">
+              <tbody>
                 {highRisk.map((r) => (
-                  <tr key={r.id} className="hover:bg-slate-50">
-                    <td className="px-4 py-2 font-medium">{r.firstName} {r.lastName}</td>
-                    <td className="px-4 py-2 text-slate-500">{r.department ?? "—"}</td>
-                    <td className="px-4 py-2 text-right">{riskBadge(Math.round(r.riskScore))}</td>
+                  <tr key={r.id}>
+                    <td className="cell-strong">{r.firstName} {r.lastName}</td>
+                    <td>{r.department ?? "—"}</td>
+                    <td className="text-right">{riskBadge(r.riskScore)}</td>
                   </tr>
                 ))}
               </tbody>
@@ -84,16 +97,20 @@ export default async function AnalyticsPage() {
           )}
         </div>
 
-        <div className="card p-0">
-          <h2 className="border-b border-slate-200 px-4 py-3 text-sm font-semibold text-slate-600">Repeat clickers (≥ 2 campaigns)</h2>
-          {repeats.length === 0 ? <p className="p-6 text-sm text-slate-500">None yet.</p> : (
-            <table className="w-full text-sm">
-              <tbody className="divide-y divide-slate-100">
+        <div className="card overflow-hidden p-0">
+          <div className="border-b border-ink-200 px-5 py-3.5">
+            <h2 className="text-sm font-semibold text-ink-700">Repeat clickers (≥ 2 campaigns)</h2>
+          </div>
+          {repeats.length === 0 ? (
+            <p className="px-5 py-8 text-center text-sm text-ink-500">None yet.</p>
+          ) : (
+            <table className="data-table">
+              <tbody>
                 {repeats.map((r) => (
-                  <tr key={r.id} className="hover:bg-slate-50">
-                    <td className="px-4 py-2 font-medium">{r.name}</td>
-                    <td className="px-4 py-2 text-slate-500">{r.campaigns} campaigns</td>
-                    <td className="px-4 py-2 text-right">{riskBadge(Math.round(r.riskScore))}</td>
+                  <tr key={r.id}>
+                    <td className="cell-strong">{r.name}</td>
+                    <td>{r.campaigns} campaigns</td>
+                    <td className="text-right">{riskBadge(r.riskScore)}</td>
                   </tr>
                 ))}
               </tbody>
@@ -102,16 +119,21 @@ export default async function AnalyticsPage() {
         </div>
       </div>
 
-      <div className="card p-0">
-        <h2 className="border-b border-slate-200 px-4 py-3 text-sm font-semibold text-slate-600">Per-campaign reports</h2>
-        {campaignList.length === 0 ? <p className="p-6 text-sm text-slate-500">No campaigns yet.</p> : (
-          <table className="w-full text-sm">
-            <tbody className="divide-y divide-slate-100">
+      {/* Per-campaign reports */}
+      <div className="card overflow-hidden p-0">
+        <div className="border-b border-ink-200 px-5 py-3.5">
+          <h2 className="text-sm font-semibold text-ink-700">Per-campaign reports</h2>
+        </div>
+        {campaignList.length === 0 ? (
+          <p className="px-5 py-8 text-center text-sm text-ink-500">No campaigns yet.</p>
+        ) : (
+          <table className="data-table">
+            <tbody>
               {campaignList.map((c) => (
-                <tr key={c.id} className="hover:bg-slate-50">
-                  <td className="px-4 py-2 font-medium">{c.name}</td>
-                  <td className="px-4 py-2 text-slate-500">{c.status}</td>
-                  <td className="px-4 py-2 text-right">
+                <tr key={c.id}>
+                  <td className="cell-strong">{c.name}</td>
+                  <td><CampaignStatusBadge status={c.status} /></td>
+                  <td className="text-right">
                     <Link href={`/campaigns/${c.id}/report`} className="text-sm font-medium text-brand-600 hover:text-brand-700">View report</Link>
                   </td>
                 </tr>
