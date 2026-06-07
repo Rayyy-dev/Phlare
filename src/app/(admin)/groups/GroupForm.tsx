@@ -34,7 +34,7 @@ export function GroupForm({
         {fe.name && <p className="form-error">{fe.name}</p>}
       </div>
       <div>
-        <label className="label" htmlFor="description">Description <span className="text-slate-500">(optional)</span></label>
+        <label className="label" htmlFor="description">Description <span className="text-ink-500">(optional)</span></label>
         <textarea id="description" name="description" className="input min-h-20" defaultValue={group?.description ?? ""} />
         {fe.description && <p className="form-error">{fe.description}</p>}
       </div>

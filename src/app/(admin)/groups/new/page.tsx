@@ -10,7 +10,7 @@ export default async function NewGroupPage() {
     <div className="max-w-2xl space-y-6">
       <div>
         <BackLink href="/groups" label="Groups" />
-        <h1 className="mt-1 text-2xl font-bold tracking-tight">New group</h1>
+        <h1 className="mt-1 text-2xl font-semibold tracking-tight text-ink-900">New group</h1>
       </div>
       <div className="card">
         <GroupForm mode="create" />

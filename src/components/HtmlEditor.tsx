@@ -47,7 +47,7 @@ export function HtmlEditor({
           title="Preview"
           sandbox=""
           srcDoc={preview}
-          className="min-h-80 w-full rounded-md border border-slate-300 bg-white"
+          className="min-h-80 w-full rounded-md border border-ink-300 bg-white"
         />
       </div>
     </div>

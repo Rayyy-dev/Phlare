@@ -5,7 +5,7 @@ import { getCampaign } from "@/server/campaigns/service";
 import {
   getCampaignMetrics, getCampaignTimeSeries, getCampaignResults,
 } from "@/server/analytics/service";
-import { RatesBarChart, TimeSeriesChart } from "@/components/charts";
+import { EngagementRatesChart, TimeSeriesChart } from "@/components/charts";
 
 export const dynamic = "force-dynamic";
 
@@ -31,11 +31,11 @@ export default async function CampaignReportPage({
   ];
 
   return (
-    <div className="max-w-4xl space-y-6">
-      <div className="flex items-start justify-between">
+    <div className="space-y-6">
+      <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <BackLink href="/campaigns" label="Campaigns" />
-          <h1 className="mt-1 text-2xl font-bold tracking-tight">{campaign.name} — report</h1>
+          <h1 className="mt-1 text-2xl font-semibold tracking-tight text-ink-900">{campaign.name} — report</h1>
         </div>
         <div className="flex gap-2">
           <a href={`/campaigns/${id}/export`} className="btn-secondary">Export CSV</a>
@@ -53,43 +53,47 @@ export default async function CampaignReportPage({
           { label: "Phish-prone", value: `${metrics.phishProne}%` },
         ].map((m) => (
           <div key={m.label} className="card text-center">
-            <p className="text-2xl font-bold">{m.value}</p>
-            <p className="text-xs text-slate-500">{m.label}</p>
+            <p className="text-2xl font-semibold text-ink-900">{m.value}</p>
+            <p className="text-xs text-ink-500">{m.label}</p>
           </div>
         ))}
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
         <div className="card">
-          <h2 className="mb-3 text-sm font-semibold text-slate-600">Engagement rates</h2>
-          <RatesBarChart data={rateData} />
+          <h2 className="mb-3 text-sm font-semibold text-ink-700">Engagement rates</h2>
+          <EngagementRatesChart data={rateData} />
         </div>
         <div className="card">
-          <h2 className="mb-3 text-sm font-semibold text-slate-600">Events over time</h2>
-          {series.length ? <TimeSeriesChart data={series} /> : <p className="text-sm text-slate-500">No interaction events yet.</p>}
+          <h2 className="mb-3 text-sm font-semibold text-ink-700">Events over time</h2>
+          {series.length ? <TimeSeriesChart data={series} /> : <p className="py-8 text-center text-sm text-ink-500">No interaction events yet.</p>}
         </div>
       </div>
 
-      <div className="card p-0">
-        <h2 className="border-b border-slate-200 px-4 py-3 text-sm font-semibold text-slate-600">Per-recipient results</h2>
-        <table className="w-full text-sm">
-          <thead className="bg-slate-50 text-left text-xs uppercase text-slate-500">
+      <div className="card overflow-hidden p-0">
+        <h2 className="border-b border-ink-200 px-5 py-3.5 text-sm font-semibold text-ink-700">Per-recipient results</h2>
+        <table className="data-table">
+          <thead>
             <tr>
-              <th className="px-4 py-2">Recipient</th><th className="px-4 py-2">Department</th>
-              <th className="px-4 py-2">Opened</th><th className="px-4 py-2">Clicked</th>
-              <th className="px-4 py-2">Submitted</th><th className="px-4 py-2">Reported</th><th className="px-4 py-2">Quiz</th>
+              <th>Recipient</th>
+              <th>Department</th>
+              <th>Opened</th>
+              <th>Clicked</th>
+              <th>Submitted</th>
+              <th>Reported</th>
+              <th>Quiz</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100">
+          <tbody>
             {results.map((r, i) => (
-              <tr key={i} className="hover:bg-slate-50">
-                <td className="px-4 py-2 font-medium">{r.firstName} {r.lastName}</td>
-                <td className="px-4 py-2 text-slate-600">{r.department ?? "—"}</td>
-                <td className="px-4 py-2">{r.opened ? "✓" : "—"}</td>
-                <td className="px-4 py-2">{r.clicked ? "✓" : "—"}</td>
-                <td className="px-4 py-2">{r.submitted ? "✓" : "—"}</td>
-                <td className="px-4 py-2">{r.reported ? "✓" : "—"}</td>
-                <td className="px-4 py-2 text-slate-600">{r.quizScore || "—"}</td>
+              <tr key={i}>
+                <td className="cell-strong">{r.firstName} {r.lastName}</td>
+                <td>{r.department ?? "—"}</td>
+                <td>{r.opened ? "✓" : "—"}</td>
+                <td>{r.clicked ? "✓" : "—"}</td>
+                <td>{r.submitted ? "✓" : "—"}</td>
+                <td>{r.reported ? "✓" : "—"}</td>
+                <td>{r.quizScore || "—"}</td>
               </tr>
             ))}
           </tbody>

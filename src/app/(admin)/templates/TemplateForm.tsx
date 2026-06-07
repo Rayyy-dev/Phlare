@@ -81,10 +81,10 @@ export function TemplateForm({
         </div>
       </div>
 
-      <div className="rounded-md bg-slate-50 px-4 py-3 text-xs text-slate-600">
+      <div className="rounded-md bg-ink-50 px-4 py-3 text-xs text-ink-600">
         Personalisation variables:{" "}
         {PERSONALISATION_VARIABLES.map((v) => (
-          <code key={v} className="mr-1 rounded bg-white px-1.5 py-0.5 text-slate-700">{`{{${v}}}`}</code>
+          <code key={v} className="mr-1 rounded bg-white px-1.5 py-0.5 text-ink-700">{`{{${v}}}`}</code>
         ))}
         <span className="ml-1">— anything else is left as-is.</span>
       </div>
@@ -93,12 +93,12 @@ export function TemplateForm({
       {fe.htmlBody && <p className="form-error">{fe.htmlBody}</p>}
 
       <div>
-        <label className="label" htmlFor="textBody">Plain-text alternative <span className="text-slate-500">(optional)</span></label>
+        <label className="label" htmlFor="textBody">Plain-text alternative <span className="text-ink-500">(optional)</span></label>
         <textarea id="textBody" name="textBody" className="input min-h-24 font-mono text-xs" defaultValue={template?.textBody ?? ""} />
       </div>
 
       <div>
-        <label className="label" htmlFor="redFlags">Red flags <span className="text-slate-500">(one per line — shown on the teachable-moment page)</span></label>
+        <label className="label" htmlFor="redFlags">Red flags <span className="text-ink-500">(one per line — shown on the teachable-moment page)</span></label>
         <textarea id="redFlags" name="redFlags" className="input min-h-28" defaultValue={(template?.redFlags ?? []).join("\n")}
           placeholder={"Mismatched sender address\nUrgent deadline pressure\nGeneric greeting"} />
       </div>

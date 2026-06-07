@@ -56,7 +56,7 @@ export function SendingProfileForm({
           </select>
         </div>
         <div>
-          <label className="label" htmlFor="username">Username <span className="text-slate-500">(optional)</span></label>
+          <label className="label" htmlFor="username">Username <span className="text-ink-500">(optional)</span></label>
           <input id="username" name="username" className="input" defaultValue={profile?.username ?? ""} autoComplete="off" />
         </div>
       </div>
@@ -64,7 +64,7 @@ export function SendingProfileForm({
       <div>
         <label className="label" htmlFor="password">
           Password{" "}
-          <span className="text-slate-500">
+          <span className="text-ink-500">
             {mode === "edit" && profile?.hasPassword
               ? "(leave blank to keep current — encrypted at rest)"
               : "(optional — encrypted at rest)"}

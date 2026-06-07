@@ -23,7 +23,7 @@ export default async function EditRecipientPage({
     <div className="max-w-2xl space-y-6">
       <div>
         <BackLink href="/recipients" label="Recipients" />
-        <h1 className="mt-1 text-2xl font-bold tracking-tight">Edit recipient</h1>
+        <h1 className="mt-1 text-2xl font-semibold tracking-tight text-ink-900">Edit recipient</h1>
       </div>
       <div className="card">
         <RecipientForm mode="edit" recipient={recipient} />

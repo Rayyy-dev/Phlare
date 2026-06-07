@@ -13,8 +13,8 @@ export default async function ImportRecipientsPage() {
     <div className="max-w-3xl space-y-6">
       <div>
         <BackLink href="/recipients" label="Recipients" />
-        <h1 className="mt-1 text-2xl font-bold tracking-tight">Import recipients from CSV</h1>
-        <p className="mt-1 text-sm text-slate-600">
+        <h1 className="mt-1 text-2xl font-semibold tracking-tight text-ink-900">Import recipients from CSV</h1>
+        <p className="mt-1 text-sm text-ink-600">
           Upload a CSV, map its columns, and review the result. Importing is
           idempotent — re-importing the same file creates no duplicates.
         </p>

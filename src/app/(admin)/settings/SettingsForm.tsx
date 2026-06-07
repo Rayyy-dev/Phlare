@@ -30,7 +30,7 @@ export function SettingsForm({
           <label className="label" htmlFor="baseUrl">Public base URL</label>
           <input id="baseUrl" name="baseUrl" type="url" className="input" defaultValue={settings.baseUrl} required />
           {fe.baseUrl && <p className="form-error">{fe.baseUrl}</p>}
-          <p className="mt-1 text-xs text-slate-500">Tracking links are built from this.</p>
+          <p className="mt-1 text-xs text-ink-500">Tracking links are built from this.</p>
         </div>
         <div>
           <label className="label" htmlFor="defaultThrottlePerMinute">Default send rate (per minute)</label>
@@ -41,10 +41,10 @@ export function SettingsForm({
           <label className="label" htmlFor="retentionDays">Event retention (days)</label>
           <input id="retentionDays" name="retentionDays" type="number" className="input" defaultValue={settings.retentionDays} min={0} required />
           {fe.retentionDays && <p className="form-error">{fe.retentionDays}</p>}
-          <p className="mt-1 text-xs text-slate-500">Raw events older than this are deleted daily. 0 = keep indefinitely.</p>
+          <p className="mt-1 text-xs text-ink-500">Raw events older than this are deleted daily. 0 = keep indefinitely.</p>
         </div>
         <div className="sm:col-span-2">
-          <label className="label" htmlFor="reportEmail">Report inbox <span className="text-slate-500">(optional)</span></label>
+          <label className="label" htmlFor="reportEmail">Report inbox <span className="text-ink-500">(optional)</span></label>
           <input id="reportEmail" name="reportEmail" type="email" className="input" defaultValue={settings.reportEmail ?? ""} placeholder="security@acme-corp.example" />
           {fe.reportEmail && <p className="form-error">{fe.reportEmail}</p>}
         </div>

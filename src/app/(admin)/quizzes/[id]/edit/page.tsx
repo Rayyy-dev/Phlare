@@ -29,7 +29,7 @@ export default async function EditQuizPage({
     <div className="max-w-3xl space-y-6">
       <div>
         <BackLink href="/quizzes" label="Quizzes" />
-        <h1 className="mt-1 text-2xl font-bold tracking-tight">Edit quiz</h1>
+        <h1 className="mt-1 text-2xl font-semibold tracking-tight text-ink-900">Edit quiz</h1>
       </div>
       <div className="card">
         <QuizForm mode="edit" quiz={formValue} templates={templates.map((t) => ({ id: t.id, name: t.name }))} />

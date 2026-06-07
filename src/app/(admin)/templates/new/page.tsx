@@ -12,7 +12,7 @@ export default async function NewTemplatePage() {
     <div className="max-w-5xl space-y-6">
       <div>
         <BackLink href="/templates" label="Email templates" />
-        <h1 className="mt-1 text-2xl font-bold tracking-tight">New template</h1>
+        <h1 className="mt-1 text-2xl font-semibold tracking-tight text-ink-900">New template</h1>
       </div>
       <div className="card">
         <TemplateForm mode="create" company={settings.orgName} />

@@ -4,6 +4,7 @@ import { BackLink } from "@/components/BackLink";
 import { requireAdmin } from "@/server/auth/guard";
 import { getCampaign, getCampaignStats } from "@/server/campaigns/service";
 import { ConfirmSubmit } from "@/components/ConfirmSubmit";
+import { CampaignStatusBadge } from "@/components/StatusBadge";
 import { LaunchControl } from "../LaunchControl";
 import {
   pauseCampaignAction,
@@ -41,8 +42,8 @@ export default async function CampaignDetailPage({
       <div className="flex items-start justify-between">
         <div>
           <BackLink href="/campaigns" label="Campaigns" />
-          <h1 className="mt-1 text-2xl font-bold tracking-tight">{campaign.name}</h1>
-          <p className="mt-1 text-sm text-slate-500">Status: <strong>{campaign.status}</strong></p>
+          <h1 className="mt-1 text-2xl font-semibold tracking-tight text-ink-900">{campaign.name}</h1>
+          <div className="mt-2"><CampaignStatusBadge status={campaign.status} /></div>
         </div>
         <div className="flex items-center gap-3">
           <Link href={`/campaigns/${campaign.id}/report`} className="btn-secondary">View report</Link>
@@ -58,14 +59,14 @@ export default async function CampaignDetailPage({
       <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-6">
         {metrics.map((m) => (
           <div key={m.label} className="card text-center">
-            <p className="text-2xl font-bold">{m.value}</p>
-            <p className="text-xs text-slate-500">{m.label}</p>
+            <p className="text-2xl font-semibold text-ink-900">{m.value}</p>
+            <p className="text-xs text-ink-500">{m.label}</p>
           </div>
         ))}
       </div>
 
       <div className="card space-y-2 text-sm">
-        <h2 className="text-sm font-semibold text-slate-600">Configuration</h2>
+        <h2 className="text-sm font-semibold text-ink-600">Configuration</h2>
         <Row label="Email template" value={campaign.emailTemplate.name} />
         <Row label="Landing page" value={campaign.landingPage.name} />
         <Row label="Sending profile" value={campaign.sendingProfile.name} />
@@ -78,13 +79,13 @@ export default async function CampaignDetailPage({
       </div>
 
       <div className="card">
-        <h2 className="mb-3 text-sm font-semibold text-slate-600">Controls</h2>
+        <h2 className="mb-3 text-sm font-semibold text-ink-600">Controls</h2>
 
         {campaign.status === "DRAFT" && <LaunchControl campaignId={campaign.id} scheduled={scheduledFuture} />}
 
         {campaign.status === "SCHEDULED" && (
           <div className="space-y-3">
-            <p className="text-sm text-slate-600">Scheduled to launch automatically at {campaign.scheduledAt?.toLocaleString()}.</p>
+            <p className="text-sm text-ink-600">Scheduled to launch automatically at {campaign.scheduledAt?.toLocaleString()}.</p>
             <LifecycleButton action={stopCampaignAction} id={campaign.id} label="Stop" confirm={`Stop "${campaign.name}"?`} danger />
           </div>
         )}
@@ -104,7 +105,7 @@ export default async function CampaignDetailPage({
         )}
 
         {(campaign.status === "COMPLETED" || campaign.status === "STOPPED") && (
-          <p className="text-sm text-slate-500">This campaign is {campaign.status.toLowerCase()}. No further sends will occur.</p>
+          <p className="text-sm text-ink-500">This campaign is {campaign.status.toLowerCase()}. No further sends will occur.</p>
         )}
       </div>
     </div>
@@ -113,9 +114,9 @@ export default async function CampaignDetailPage({
 
 function Row({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex justify-between border-t border-slate-100 py-1.5 first:border-t-0">
-      <span className="text-slate-500">{label}</span>
-      <span className="text-slate-800">{value}</span>
+    <div className="flex justify-between border-t border-ink-100 py-1.5 first:border-t-0">
+      <span className="text-ink-500">{label}</span>
+      <span className="text-ink-800">{value}</span>
     </div>
   );
 }

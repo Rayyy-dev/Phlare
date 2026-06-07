@@ -62,15 +62,15 @@ export function LandingPageForm({
       <HtmlEditor name="htmlBody" defaultValue={page?.htmlBody} personalise={false} />
       {fe.htmlBody && <p className="form-error">{fe.htmlBody}</p>}
 
-      <div className="rounded-md border border-slate-200 p-4">
-        <label className="flex items-center gap-2 text-sm font-medium text-slate-700">
+      <div className="rounded-md border border-ink-200 p-4">
+        <label className="flex items-center gap-2 text-sm font-medium text-ink-700">
           <input type="checkbox" name="hasForm" className="h-4 w-4" checked={hasForm} onChange={(e) => setHasForm(e.target.checked)} />
           This page shows a fake form
         </label>
 
         {hasForm && (
           <div className="mt-4 space-y-3">
-            <p className="text-xs text-slate-500">
+            <p className="text-xs text-ink-500">
               Define the form fields below. Only the field <strong>name, label and
               type</strong> are stored — a recipient&apos;s actual input is never
               captured or saved.

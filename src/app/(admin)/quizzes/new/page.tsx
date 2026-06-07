@@ -12,7 +12,7 @@ export default async function NewQuizPage() {
     <div className="max-w-3xl space-y-6">
       <div>
         <BackLink href="/quizzes" label="Quizzes" />
-        <h1 className="mt-1 text-2xl font-bold tracking-tight">New quiz</h1>
+        <h1 className="mt-1 text-2xl font-semibold tracking-tight text-ink-900">New quiz</h1>
       </div>
       <div className="card">
         <QuizForm mode="create" templates={templates.map((t) => ({ id: t.id, name: t.name }))} />

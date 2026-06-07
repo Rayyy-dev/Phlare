@@ -9,8 +9,8 @@ export const dynamic = "force-dynamic";
 function Unavailable() {
   return (
     <main className="mx-auto flex min-h-screen max-w-md flex-col justify-center px-4 text-center">
-      <h1 className="text-xl font-semibold text-slate-800">This link is no longer available</h1>
-      <p className="mt-2 text-sm text-slate-500">If you reached this page from an email, you can safely close it.</p>
+      <h1 className="text-xl font-semibold text-ink-800">This link is no longer available</h1>
+      <p className="mt-2 text-sm text-ink-500">If you reached this page from an email, you can safely close it.</p>
     </main>
   );
 }

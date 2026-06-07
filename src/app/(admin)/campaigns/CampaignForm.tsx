@@ -69,14 +69,14 @@ export function CampaignForm({
 
       <div>
         <span className="label">Target groups</span>
-        <div className="space-y-1 rounded-md border border-slate-200 p-3">
+        <div className="space-y-1 rounded-md border border-ink-200 p-3">
           {groups.length === 0 ? (
-            <p className="text-sm text-slate-500">No groups yet — create one under Groups.</p>
+            <p className="text-sm text-ink-500">No groups yet — create one under Groups.</p>
           ) : (
             groups.map((g) => (
-              <label key={g.id} className="flex items-center gap-2 text-sm text-slate-700">
+              <label key={g.id} className="flex items-center gap-2 text-sm text-ink-700">
                 <input type="checkbox" name="groupIds" value={g.id} className="h-4 w-4" />
-                {g.name} <span className="text-slate-500">({g.memberCount})</span>
+                {g.name} <span className="text-ink-500">({g.memberCount})</span>
               </label>
             ))
           )}
@@ -86,14 +86,14 @@ export function CampaignForm({
 
       <div className="grid gap-4 sm:grid-cols-3">
         <div>
-          <label className="label" htmlFor="quizId">Knowledge-check quiz <span className="text-slate-500">(optional)</span></label>
+          <label className="label" htmlFor="quizId">Knowledge-check quiz <span className="text-ink-500">(optional)</span></label>
           <select id="quizId" name="quizId" className="input" defaultValue="">
             <option value="">None</option>
             {quizzes.map((q) => <option key={q.id} value={q.id}>{q.name}</option>)}
           </select>
         </div>
         <div>
-          <label className="label" htmlFor="scheduledAt">Schedule <span className="text-slate-500">(blank = on launch)</span></label>
+          <label className="label" htmlFor="scheduledAt">Schedule <span className="text-ink-500">(blank = on launch)</span></label>
           <input id="scheduledAt" name="scheduledAt" type="datetime-local" className="input" />
         </div>
         <div>

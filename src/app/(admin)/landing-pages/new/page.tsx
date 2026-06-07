@@ -10,7 +10,7 @@ export default async function NewLandingPage() {
     <div className="max-w-5xl space-y-6">
       <div>
         <BackLink href="/landing-pages" label="Landing pages" />
-        <h1 className="mt-1 text-2xl font-bold tracking-tight">New landing page</h1>
+        <h1 className="mt-1 text-2xl font-semibold tracking-tight text-ink-900">New landing page</h1>
       </div>
       <div className="card">
         <LandingPageForm mode="create" />

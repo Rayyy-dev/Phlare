@@ -36,7 +36,7 @@ export default async function EditTemplatePage({
     <div className="max-w-5xl space-y-6">
       <div>
         <BackLink href="/templates" label="Email templates" />
-        <h1 className="mt-1 text-2xl font-bold tracking-tight">Edit template</h1>
+        <h1 className="mt-1 text-2xl font-semibold tracking-tight text-ink-900">Edit template</h1>
       </div>
       <div className="card">
         <TemplateForm mode="edit" template={formValue} company={settings.orgName} />
