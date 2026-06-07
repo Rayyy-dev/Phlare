@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { BackLink } from "@/components/BackLink";
 import { requireAdmin } from "@/server/auth/guard";
 import { RecipientForm } from "../RecipientForm";
 
@@ -9,7 +9,7 @@ export default async function NewRecipientPage() {
   return (
     <div className="max-w-2xl space-y-6">
       <div>
-        <Link href="/recipients" className="text-sm text-slate-500 hover:text-slate-700">← Recipients</Link>
+        <BackLink href="/recipients" label="Recipients" />
         <h1 className="mt-1 text-2xl font-bold tracking-tight">Add recipient</h1>
       </div>
       <div className="card">

@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { BackLink } from "@/components/BackLink";
 import { requireAdmin } from "@/server/auth/guard";
 import { LandingPageForm } from "../LandingPageForm";
 
@@ -9,7 +9,7 @@ export default async function NewLandingPage() {
   return (
     <div className="max-w-5xl space-y-6">
       <div>
-        <Link href="/landing-pages" className="text-sm text-slate-500 hover:text-slate-700">← Landing pages</Link>
+        <BackLink href="/landing-pages" label="Landing pages" />
         <h1 className="mt-1 text-2xl font-bold tracking-tight">New landing page</h1>
       </div>
       <div className="card">

@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { BackLink } from "@/components/BackLink";
 import { requireAdmin } from "@/server/auth/guard";
 import { GroupForm } from "../GroupForm";
 
@@ -9,7 +9,7 @@ export default async function NewGroupPage() {
   return (
     <div className="max-w-2xl space-y-6">
       <div>
-        <Link href="/groups" className="text-sm text-slate-500 hover:text-slate-700">← Groups</Link>
+        <BackLink href="/groups" label="Groups" />
         <h1 className="mt-1 text-2xl font-bold tracking-tight">New group</h1>
       </div>
       <div className="card">

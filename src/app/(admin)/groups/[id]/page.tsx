@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { BackLink } from "@/components/BackLink";
 import { notFound } from "next/navigation";
 import { requireAdmin } from "@/server/auth/guard";
 import { getGroupWithMembers } from "@/server/groups/service";
@@ -28,7 +28,7 @@ export default async function GroupDetailPage({
     <div className="max-w-4xl space-y-6">
       <div className="flex items-start justify-between">
         <div>
-          <Link href="/groups" className="text-sm text-slate-500 hover:text-slate-700">← Groups</Link>
+          <BackLink href="/groups" label="Groups" />
           <h1 className="mt-1 text-2xl font-bold tracking-tight">{group.name}</h1>
           <p className="mt-1 text-sm text-slate-600">{members.length} member{members.length === 1 ? "" : "s"}.</p>
         </div>

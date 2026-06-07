@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { BackLink } from "@/components/BackLink";
 import { requireAdmin } from "@/server/auth/guard";
 import { getCampaign, getCampaignStats } from "@/server/campaigns/service";
 import { ConfirmSubmit } from "@/components/ConfirmSubmit";
@@ -39,7 +40,7 @@ export default async function CampaignDetailPage({
     <div className="max-w-4xl space-y-6">
       <div className="flex items-start justify-between">
         <div>
-          <Link href="/campaigns" className="text-sm text-slate-500 hover:text-slate-700">← Campaigns</Link>
+          <BackLink href="/campaigns" label="Campaigns" />
           <h1 className="mt-1 text-2xl font-bold tracking-tight">{campaign.name}</h1>
           <p className="mt-1 text-sm text-slate-500">Status: <strong>{campaign.status}</strong></p>
         </div>

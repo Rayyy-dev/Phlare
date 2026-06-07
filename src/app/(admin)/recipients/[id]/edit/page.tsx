@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { BackLink } from "@/components/BackLink";
 import { notFound } from "next/navigation";
 import { requireAdmin } from "@/server/auth/guard";
 import { prisma } from "@/server/db";
@@ -22,7 +22,7 @@ export default async function EditRecipientPage({
   return (
     <div className="max-w-2xl space-y-6">
       <div>
-        <Link href="/recipients" className="text-sm text-slate-500 hover:text-slate-700">← Recipients</Link>
+        <BackLink href="/recipients" label="Recipients" />
         <h1 className="mt-1 text-2xl font-bold tracking-tight">Edit recipient</h1>
       </div>
       <div className="card">
