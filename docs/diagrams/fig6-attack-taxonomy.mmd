@@ -1,0 +1,34 @@
+%%{init: {"theme":"neutral","themeVariables":{"fontFamily":"Georgia, 'Times New Roman', serif","fontSize":"15px","lineColor":"#222","primaryColor":"#f2f2f2","primaryBorderColor":"#222","primaryTextColor":"#111","clusterBkg":"#fafafa","clusterBorder":"#888"},"flowchart":{"curve":"basis","nodeSpacing":40,"rankSpacing":55,"padding":12}}}%%
+flowchart TB
+    %% Figure 6: Phishing attack taxonomy (Chapter 1, conceptual)
+    %% A root category branches into three classification axes, each with examples.
+
+    ROOT["<b>Phishing attacks</b>"]
+
+    subgraph TARGET["By targeting strategy"]
+        direction LR
+        T1["Mass phishing"]
+        T2["Spear phishing"]
+        T3["Whaling"]
+        T4["Business Email<br/>Compromise (BEC)"]
+    end
+
+    subgraph CHANNEL["By communication channel"]
+        direction LR
+        C1["Email"]
+        C2["Vishing (voice)"]
+        C3["Smishing (SMS)"]
+        C4["Social media"]
+    end
+
+    subgraph METHOD["By technical method"]
+        direction LR
+        M1["Clone phishing"]
+        M2["Pharming"]
+        M3["Evil twin"]
+        M4["Man-in-the-middle"]
+    end
+
+    ROOT --> TARGET
+    ROOT --> CHANNEL
+    ROOT --> METHOD
