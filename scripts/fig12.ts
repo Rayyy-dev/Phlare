@@ -68,13 +68,12 @@ async function main() {
   const browser = await chromium.launch({ args: ["--no-sandbox"] });
   const page = await browser.newPage({ deviceScaleFactor: 2 });
   await page.setContent(html, { waitUntil: "networkidle" });
-  const el = await page.$(".term");
-  // Screenshot the padded body so the drop-shadow is included.
-  await page.screenshot({ path: join(OUT, "fig12-containers.png"), clip: await page.evaluate(() => {
+  // Clip to the padded body so the terminal's drop-shadow is included.
+  const clip = await page.evaluate(() => {
     const r = document.body.getBoundingClientRect();
     return { x: 0, y: 0, width: Math.ceil(r.width), height: Math.ceil(r.height) };
-  }) });
-  void el;
+  });
+  await page.screenshot({ path: join(OUT, "fig12-containers.png"), clip });
   await browser.close();
   console.log("  ✓ fig12-containers.png");
 }
