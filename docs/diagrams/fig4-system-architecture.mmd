@@ -1,6 +1,6 @@
 %%{init: {"theme":"neutral","themeVariables":{"fontFamily":"Helvetica, Arial, sans-serif","fontSize":"14px","lineColor":"#222","primaryColor":"#f2f2f2","primaryBorderColor":"#222","primaryTextColor":"#111","clusterBkg":"#fafafa","clusterBorder":"#888"},"flowchart":{"curve":"basis","nodeSpacing":40,"rankSpacing":50,"padding":8}}}%%
 flowchart TB
-    %% Figure 4 — System concept / architecture (reflects the Phase 1 implementation)
+    %% Figure 4: System concept / architecture (reflects the Phase 1 implementation)
     %% Left band = admin-driven configuration & sending.
     %% Right band = recipient-driven tracking + just-in-time learning loop.
 
@@ -27,7 +27,7 @@ flowchart TB
         PX["/t/o/:token<br/>open pixel/"]
         CLK["/t/c/:token<br/>link click/"]
         LP["Landing page<br/>(fake form)"]
-        SUB["/t/s/:token<br/>submit — field NAMES only/"]
+        SUB["/t/s/:token<br/>submit (field NAMES only)/"]
         TEACH["Teachable-moment page<br/>red flags + optional quiz"]
     end
 
