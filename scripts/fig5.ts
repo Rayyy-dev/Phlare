@@ -19,7 +19,7 @@ const events: [string, string][] = [
   ["2001", "Early e-commerce phishing attack (E-Gold)"],
   ["2003", "eBay / PayPal domain-spoofing campaigns"],
   ["Late 2000s", "Social-media era; rise of spear phishing"],
-  ["2016", "Business Email Compromise era (FACC case)"],
+  ["2016", "Business Email Compromise era"],
   ["2022", "Generative-AI-assisted phishing"],
   ["2025", "Record attack volumes + AI voice cloning"],
 ];
