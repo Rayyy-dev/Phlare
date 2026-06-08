@@ -147,6 +147,10 @@ running log.
   Vitest unit tests for the core logic, a reproducible `npm run demo` evaluation
   harness (synthetic data → metrics + PDF + screenshots), and a full
   `docker compose up --build` stack.
+- ✅ **Phase 8 — UI redesign**: a cohesive design system (color tokens, a type
+  scale, reusable layout components like PageHeader/EmptyState/Modal, and a
+  shared data-table style) applied across every admin and recipient-facing page,
+  plus color-coded analytics charts, status/risk badges, and a collapsible sidebar.
 
 ---
 
