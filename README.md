@@ -46,11 +46,11 @@ and [`DECISIONS.md`](DECISIONS.md).
 
 ## Data model
 
-![Phlare entity-relationship diagram](docs/diagrams/fig9-simplified-erd.png)
+![Phlare entity-relationship diagram](docs/diagrams/erd.png)
 
-The core entities and their relationships. Submissions store field *names* only;
-the values an employee types are never persisted. The full schema, with every
-column, is documented in [`docs/database-schema.md`](docs/database-schema.md).
+The full entity-relationship model. Submissions store field *names* only; the
+values an employee types are never persisted. A narrative walkthrough of the
+schema is in [`docs/database-schema.md`](docs/database-schema.md).
 
 ---
 
