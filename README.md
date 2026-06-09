@@ -5,8 +5,8 @@
 Phlare is the practical artifact for the Bachelor of Engineering (Informatyka)
 thesis *"Design and Evaluation of a Web-Based Phishing Simulation Platform for
 Security Awareness Training."* It lets a small or medium enterprise run
-controlled, **authorised** phishing simulations against its own staff and — the
-distinguishing feature — delivers **just-in-time micro-learning** the moment an
+controlled, **authorised** phishing simulations against its own staff and, as its
+distinguishing feature, delivers **just-in-time micro-learning** the moment an
 employee clicks or submits, explaining the exact red flags they missed.
 
 > ⚠️ **Authorised defensive training only.** Phlare is a teaching tool. It never
@@ -18,11 +18,11 @@ employee clicks or submits, explaining the exact red flags they missed.
 
 ## What makes it different
 
-- **Built-in content library + just-in-time learning** — unlike Gophish, Phlare
+- **Built-in content library + just-in-time learning:** unlike Gophish, Phlare
   ships with templates *and* teaches at the moment of failure.
-- **One-command deployment** — `docker compose up` brings up the whole stack.
-- **Transparent, explainable risk scoring** — a documented formula, not a black box.
-- **Psychological-principle tagging** — every template is tagged with the
+- **One-command deployment:** `docker compose up` brings up the whole stack.
+- **Transparent, explainable risk scoring:** a documented formula, not a black box.
+- **Psychological-principle tagging:** every template is tagged with the
   Cialdini principle it exercises, tying the tool to the social-engineering theory.
 
 ---
@@ -44,7 +44,17 @@ and [`DECISIONS.md`](DECISIONS.md).
 
 ---
 
-## Quick start (Docker — recommended)
+## Data model
+
+![Phlare entity-relationship diagram](docs/diagrams/fig9-simplified-erd.png)
+
+The core entities and their relationships. Submissions store field *names* only;
+the values an employee types are never persisted. The full schema, with every
+column, is documented in [`docs/database-schema.md`](docs/database-schema.md).
+
+---
+
+## Quick start (Docker, recommended)
 
 Requirements: Docker Desktop (or Docker Engine + Compose).
 
@@ -81,7 +91,9 @@ npm run dev                     # Next.js app on http://localhost:3000
 npm run worker:dev              # background worker (separate terminal)
 ```
 
-Then visit http://localhost:3000 and complete the setup wizard.
+Then visit http://localhost:3000 and complete the setup wizard. To load
+deterministic demo data (recipients, a campaign, and tracked events), run
+`npm run demo` while the stack is up.
 
 ---
 
@@ -93,7 +105,8 @@ Then visit http://localhost:3000 and complete the setup wizard.
 | `npm run worker:dev` | Background worker (watch mode) |
 | `npm run prisma:migrate` | Apply DB migrations (dev) |
 | `npm run db:seed` | Seed deterministic demo data |
-| `npm run diagrams` | Regenerate all thesis figures (PNG + SVG) from source |
+| `npm run demo` | Run the end-to-end evaluation harness (metrics + PDF + screenshots) |
+| `npm run diagrams` | Regenerate the Mermaid figures (PNG + SVG) from source |
 | `npm run build` / `npm start` | Production build / serve |
 | `npm test` | Unit tests (Vitest) |
 | `npm run test:e2e` | End-to-end tests (Playwright) |
@@ -119,35 +132,35 @@ Then visit http://localhost:3000 and complete the setup wizard.
 Phlare is built in **independently runnable phases**. See `DECISIONS.md` for the
 running log.
 
-- ✅ **Phase 1 — Foundation**: project scaffold, first-run setup wizard,
+- ✅ **Phase 1 · Foundation**: project scaffold, first-run setup wizard,
   session-based authentication (argon2id, lockout), PostgreSQL via Prisma,
   background-worker process, and the one-command Docker stack with Mailpit.
-- ✅ **Phase 2 — Recipients & groups**: recipient CRUD with soft-delete,
+- ✅ **Phase 2 · Recipients & groups**: recipient CRUD with soft-delete,
   search/department/group filters, group membership, and CSV import (column
   mapping, per-row report, email-idempotent, reactivation of soft-deleted).
-- ✅ **Phase 3 — Content & delivery**: email-template and landing-page CRUD with
+- ✅ **Phase 3 · Content & delivery**: email-template and landing-page CRUD with
   HTML editor + live preview, server-side sanitisation, strict whitelisted
   personalisation, SMTP sending profiles (encrypted at rest) with a Mailpit
   test-send, and a built-in starter content library.
-- ✅ **Phase 4 — Campaign engine & tracking**: campaign CRUD with the
-  authorization gate and full lifecycle (launch/pause/stop/schedule), group→target
+- ✅ **Phase 4 · Campaign engine & tracking**: campaign CRUD with the
+  authorization gate and full lifecycle (launch/pause/stop/schedule), group-to-target
   expansion with unguessable tokens, the BullMQ send pipeline (personalization +
   open pixel + tokenized link), and the public tracking routes. Form submissions
-  record field names only — typed values are never stored or logged.
-- ✅ **Phase 5 — Just-in-time learning & quiz**: the teachable-moment page
+  record field names only; typed values are never stored or logged.
+- ✅ **Phase 5 · Just-in-time learning & quiz**: the teachable-moment page
   records LEARN_VIEWED and names the specific red flags + landing page used;
   optional per-campaign knowledge-check quiz (admin builder) graded server-side,
   storing chosen indices only + QUIZ_COMPLETED.
-- ✅ **Phase 6 — Analytics, exports & risk scoring**: org/campaign dashboards
+- ✅ **Phase 6 · Analytics, exports & risk scoring**: org/campaign dashboards
   (rates, phish-prone %, time-series, department & repeat-clicker breakdowns) with
   Recharts; transparent cached risk score refreshed by a worker; CSV export and a
   Playwright-rendered PDF report.
-- ✅ **Phase 7 — Hardening, tests & demo harness**: CSP/HSTS headers, rate
+- ✅ **Phase 7 · Hardening, tests & demo harness**: CSP/HSTS headers, rate
   limiting on the public tracking routes, an enforced data-retention cleanup job,
   Vitest unit tests for the core logic, a reproducible `npm run demo` evaluation
-  harness (synthetic data → metrics + PDF + screenshots), and a full
+  harness (synthetic data to metrics + PDF + screenshots), and a full
   `docker compose up --build` stack.
-- ✅ **Phase 8 — UI redesign**: a cohesive design system (color tokens, a type
+- ✅ **Phase 8 · UI redesign**: a cohesive design system (color tokens, a type
   scale, reusable layout components like PageHeader/EmptyState/Modal, and a
   shared data-table style) applied across every admin and recipient-facing page,
   plus color-coded analytics charts, status/risk badges, and a collapsible sidebar.
